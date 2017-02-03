@@ -1,0 +1,12 @@
+{
+  "name": "transfer",
+  "version": "1.0.0",
+  "description": "A data transfer app",
+  "scripts": {},
+  "author": "ohmyxm",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^1.1.3",
+    "koa": "^2.0.0"
+  }
+}
