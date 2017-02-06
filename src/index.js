@@ -1,11 +1,42 @@
-const request = require('superagent')
-const Koa = require('koa')
-const app = new Koa()
+const http = require('http')
+const https = require('https')
+const net = require('net')
+const url = require('url')
 
-app.use(ctx => {
-  ctx.body = JSON.stringify(ctx, null, 4)
+function requestHandler(cltReq, cltRes) {
+  const urlData = url.parse(cltReq.url)
 
-  
-})
+  const options = {
+    hostname: urlData.hostname,
+    port: urlData.port || 80,
+    path: urlData.path,
+    method: cltReq.method,
+    headers: cltReq.headers
+  }
 
-app.listen(7777)
+  const svrReq = http.request(options, svrRes => {
+    cltRes.writeHead(svrRes.statusCode, svrRes.headers)
+    svrRes.pipe(cltRes)
+  }).on('error', e => {
+    cltRes.end()
+  })
+
+  cltReq.pipe(svrReq)
+}
+
+function connectHandler(cltReq, cltSocket, head) {
+  const urlData = url.parse(`https://${cltReq.url}`)
+  const srvSocket = net.connect(urlData.port, urlData.hostname, () => {
+    cltSocket.write(`HTTP/1.1 200 Connection Established
+                    'Proxy-agent: Node.js-Proxy
+                    '\r\n'`)
+    srvSocket.write(head)
+    srvSocket.pipe(cltSocket)
+    cltSocket.pipe(srvSocket)
+  })
+}
+
+https.createServer()
+  .on('request', requestHandler)
+  .on('connect', connectHandler)
+  .listen(3000, '0.0.0.0')
