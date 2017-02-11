@@ -1,7 +1,7 @@
 {
   "name": "transfer",
   "version": "1.0.0",
-  "description": "A data transfer app",
+  "description": "An HTTP/HTTPS proxy server for debugging use",
   "scripts": {
     "build": "babel ./src --out-dir build",
     "dev": "babel ./src --watch --out-dir build"
