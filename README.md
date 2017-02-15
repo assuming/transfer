@@ -1,10 +1,11 @@
 # transfer
 
-An HTTP/HTTPS proxy server for debugging use
+An HTTP/HTTPS proxy server for debugging use. For CLI, visit ()[]
 
 ### Example
-##### Start a server using cli
 
-##### Use as a node package
+```js
+const transfer = require('transfer')
+```
 
 ### APIs
