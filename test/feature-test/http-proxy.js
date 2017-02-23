@@ -1,5 +1,5 @@
 const should = require('should')
-const Transfer = require('../src/index.js')
+const Transfer = require('../../src/index.js')
 
 const proxy = new Transfer({
   port: 7777
@@ -7,8 +7,8 @@ const proxy = new Transfer({
 
 proxy.start()
 
-describe('HTTP proxy', function() {
-  describe('', function() {
-
-  })
-})
+// describe('HTTP proxy', function() {
+//   describe('', function() {
+//     it('should')
+//   })
+// })

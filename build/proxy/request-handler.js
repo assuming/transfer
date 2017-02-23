@@ -7,7 +7,7 @@ const { logJSON } = require('../utils/logger.js');
  * Request handler (listener)
  * 
  * @param  {Stream} req incoming request
- * @param  {[type]} res server response
+ * @param  {Stream} res server response
  */
 function requestHandler(req, res) {
   const options = getOptionsFromReq(req);
