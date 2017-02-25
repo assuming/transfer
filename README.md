@@ -9,7 +9,6 @@ const Transfer = require('transfer')
 
 const options = {
   port: 5555,
-
   interceptors: 'path/to/interceptors'
 }
 
@@ -36,14 +35,3 @@ Options are used to config a proxy. It's passed to the proxy through the constru
 ```
 
 ##### Filters
-
-
-
-
-
-
-
-
-
-
-s
