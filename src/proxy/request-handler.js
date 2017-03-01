@@ -6,10 +6,11 @@ const { logJSON } = require('../utils/logger.js')
 /**
  * Request handler (listener)
  * 
- * @param  {Stream} req incoming request
- * @param  {Stream} res server response
+ * @param  {Stream}  req      incoming request
+ * @param  {Stream}  res      server response
+ * @param  {Boolean} isSecure is this request thru HTTPS
  */
-function requestHandler(req, res) {
+function requestHandler(req, res, isSecure) {
   const options = getOptionsFromReq(req)
 
   logJSON(url.parse(req.url))
