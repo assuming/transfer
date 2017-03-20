@@ -5,7 +5,8 @@
   "scripts": {
     "build": "babel ./src --out-dir build",
     "dev": "babel ./src --watch --out-dir build",
-    "test": "mocha 'test/**/*.js'"
+    "test": "tape test/**/*.js | tap-notify | tap-diff",
+    "test-server": "node test/server.js"
   },
   "author": "ohmyxm",
   "license": "ISC",
@@ -19,7 +20,6 @@
   "devDependencies": {
     "babel-cli": "^6.22.2",
     "babel-plugin-transform-async-to-generator": "^6.22.0",
-    "mocha": "^3.2.0",
-    "should": "^11.2.0"
+    "tape": "^4.6.3"
   }
 }

@@ -1,20 +1,31 @@
 const http = require('http')
+const test = require('tape')
+
+/**
+ * Test cases
+ */
+
+// test('http proxing', function() {
+  
+// })
 
 const options = {
-  hostname: 'ohmyxm.xyz',
-  port: 80,
-  path: '/',
-  method: 'GET'
+  hostname: '127.0.0.1',
+  port: 7777,
+  path: 'http://ohmyxm.xyz',
+  method: 'GET',
+  headers: {
+    host: 'ohmyxm.xyz'
+  }
 }
 
 let body = ''
 const req = http.request(options, res => {
-  console.log(res.statusCode)
+  console.log(res.headers)
   res.on('data', chunk => {
     body += chunk
   })
   res.on('end', () => {
-    console.log('Transfer complete:')
     console.log(body)
   })
 })

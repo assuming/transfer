@@ -38,7 +38,7 @@ function connectHandler(cltReq, cltSocket, head) {
   const svrSocket = net.connect(urlData.port, urlData.hostname, () => {
     cltSocket.write(`HTTP/1.1 200 Connection Established
                     'Proxy-agent: Node.js-Proxy
-                    '\r\n'`);
+                    '\r\n`);
     svrSocket.write(head);
     svrSocket.pipe(cltSocket);
     cltSocket.pipe(svrSocket);
