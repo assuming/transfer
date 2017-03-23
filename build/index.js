@@ -1,18 +1,24 @@
 const CenterProxy = require('./proxy/center-proxy.js');
 
+const defaultOptions = {
+  httpPort: 7777,
+  httpsPort: 7778
+};
+
 class Transfer {
   constructor(options) {
-    const { port } = options;
+    const _options = {};
 
-    this.port = port;
-    this.centerProxy = new CenterProxy();
+    this.centerProxy = new CenterProxy(options);
   }
 
   start() {
-    this.centerProxy.run(this.port);
+    this.centerProxy.start();
   }
 
-  stop() {}
+  stop() {
+    this.centerProxy.stop();
+  }
 }
 
 module.exports = Transfer;

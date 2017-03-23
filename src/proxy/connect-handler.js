@@ -2,28 +2,54 @@ const http = require('http')
 const url = require('url')
 const net = require('net')
 const { logJSON } = require('../utils/logger.js')
-
-const CONNECT_RESPONSE = `HTTP/1.1 200 Connection Established\r\nProxy-agent: Transfer\r\n\r\n`
+const { isInList } = require('../utils/utils.js')
 
 /**
- * CONNECT request handler
- * 
- * @param  {Stream} req    client request
- * @param  {Stream} socket client socket
- * @param  {String} head   
+ * Constants
  */
-function connectHandler(req, socket, head) {
-  const reqData = connectReqParser(req.url)
 
-  logJSON(reqData)
+const CONNECT_RESPONSE = `HTTP/1.1 200 Connection Established\r\nProxy-agent: Transfer\r\n\r\n`
+const localhost = '127.0.0.1'
 
-  const pSocket = net.connect(reqData.port, reqData.hostname, () => {
+/**
+ * Connect event handler creator
+ * 
+ * @param  {Number}   port                https server port
+ * @param  {Array}    httpsWhiteList      domains list that needs to be intercepted
+ * @param  {[type]}   allHttpsDecryption  if true, all https should be intercepted
+ * @return {Function}                     connect handler function
+ */
+function makeConnectHandler(port, httpsWhiteList, allHttpsDecryption) {
+  return (req, socket, head) => {
+    const reqData = connectReqParser(req.url)
+
+    if (allHttpsDecryption) {
+      // user wants to intercept all https traffic
+      connect(port, localhost, socket, head)
+    } else {
+      // if host in white list, connect local
+      // else connect directly to the real server
+      isInList(reqData.hostname, httpsWhiteList) ?
+      connect(port, localhost, socket, head) :
+      connect(reqData.port, reqData.hostname, socket, head)
+    }
+  }
+}
+
+function connect(port, hostname, socket, head) {
+  const pSocket = net.connect(port, hostname, () => {
     socket.write(CONNECT_RESPONSE)
-    // do we need head?
     pSocket.write(head)
+
     pSocket.pipe(socket)
     socket.pipe(pSocket)
   })
+
+  pSocket.on('error', e => {
+    throw e
+  })
+
+  return pSocket
 }
 
 function connectReqParser(req) {
@@ -33,4 +59,4 @@ function connectReqParser(req) {
   return reqData
 }
 
-module.exports = connectHandler
+module.exports = makeConnectHandler

@@ -1,10 +1,6 @@
 const https = require('https');
 const url = require('url');
 
-class SecureProxy {
-  constructor() {}
+const secureProxy = https.createServer({});
 
-  run() {}
-}
-
-module.exports = SecureProxy;
+module.exports = secureProxy;

@@ -1,20 +1,47 @@
 const url = require('url')
 
 /**
- * Make request options from client's incoming request
+ * Check Transfer init options for safety
  */
-exports.getOptionsFromReq = function(req) {
-  const reqData = url.parse(req.url)
 
-  const isHTTPS = reqData
+exports.checkOptions = function(options) {
+  const result = { ...options }
+  const {
+    httpPort,
+    httpsPort,
+    httpsWhiteList,
+    interceptprs,
+    allHttpsDecryption
+  } = options
 
-  const options = {
-    host: reqData.hostname,
-    port: 80,
-    path: reqData.path,
-    method: req.method,
-    headers: req.headers
+  // if only one port provided, use default ports
+  // user must provide 2 ports
+  if ((httpPort && !httpsPort) || (!httpPort && httpsPort)) {
+    delete result.httpPort
+    delete result.httpsPort
+  }
+  
+  // if all https intercept, no need for white list
+  if (result.allHttpsDecryption) {
+    delete result.httpsWhiteList
   }
 
   return options
+}
+
+/**
+ * Check if a given host matches anything in the white list
+ */
+
+exports.isInList = function(hostname, list) {
+  for (let domain of list) {
+    const regString = domain.split('.').join('\\\\.')
+    const reg = new RegExp(`${regString}$`, "gi")
+
+    if (reg.test(hostname)) {
+      return true
+    }
+  }
+
+  return false
 }

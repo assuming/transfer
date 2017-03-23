@@ -1,28 +1,47 @@
 const http = require('http')
 const https = require('https')
-const requestHandler = require('./request-handler.js')
-const connectHandler = require('./connect-handler.js')
-const requestPrinter = require('./request-printer.js')
+
+const makeRequestHandler = require('./request-handler.js')
+const makeConnectHandler = require('./connect-handler.js')
+const secureProxy = require('./secure-proxy.js')
+
 
 class CenterProxy {
-  constructor() {
-    // https server options
-    const options = {}
+  constructor(options) {
+    const { 
+      httpPort,
+      httpsPort,
+      httpsWhiteList,
+      interceptors,
+      allHttpsDecryption
+    } = options
 
-    this.server = http.createServer()
-    this.secureServer = https.createServer(options)
+    // setup options
+    this.options = options
+    
+    this.requestHandler = makeRequestHandler(interceptors)
+    this.connectHandler = makeConnectHandler(httpsPort, httpsWhiteList, allHttpsDecryption)
+    
+    // 2 servers init
+    this.proxy = http.createServer()
+    this.secureProxy = secureProxy
   }
 
-  run(port, hostname='0.0.0.0') {
-    this.server
-      .on('request', requestHandler)
-      .on('connect', connectHandler)
-      .listen(port, hostname)
-    
-    // this.secureServer
-    //   .on('request', )
-    //   // TODO: port number limit
-    //   .listen(port + 1, hostname)
+  start() {
+    const { httpPort, httpsPort } = this.options
+
+    this.proxy
+      .on('request', this.requestHandler)
+      .on('connect', this.connectHandler)
+      .listen(httpPort)
+      
+    this.secureProxy
+      .on('request', this.requestHandler)
+      .listen(httpsPort)
+  }
+
+  stop() {
+
   }
 }
 

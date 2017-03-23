@@ -1,20 +1,10 @@
 const url = require('url');
 
-/**
- * Make request options from client's incoming request
- */
-exports.getOptionsFromReq = function (req) {
-  const reqData = url.parse(req.url);
+function checkOptions(options) {
+  const result = {};
+  // if httpsPort
 
-  const isHTTPS = reqData;
-
-  const options = {
-    host: reqData.hostname,
-    port: 80,
-    path: reqData.path,
-    method: req.method,
-    headers: req.headers
-  };
+  if (options) {}
 
   return options;
-};
+}
