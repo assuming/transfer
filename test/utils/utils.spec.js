@@ -1,5 +1,5 @@
 const test = require('tape')
-const utils = require('../../src/utils/utils.js')
+const utils = require('../../build/utils/utils.js')
 
 /**
  * Test cases
@@ -10,19 +10,22 @@ const utils = require('../../src/utils/utils.js')
 // })
 
 test('isInList', function(t) {
+  t.plan(4)
+
   const list = [
     'google.com', 
-    'api.google.com',
     'apple.com',
-    'pineapple.com.cn',
-    'api.github.com',
-    'what.the.fxxk.did.you.do.xyz'
+    'pineapple.com',
+    'api.github.com'
   ]
 
-  const hostA = 'google.com'    // true
-  const hostB = 'api.apple.com' // true
-  const hostC = 'github.com'    // false
+  const hostA = 'google.com'        // true
+  const hostB = 'api.apple.com'     // false
+  const hostC = 'github.com'        // false
+  const hostD = 'api.fxxkapple.com' // false
 
-  utils.isInList()
-
+  t.equal(utils.isInList(hostA, list), true)
+  t.equal(utils.isInList(hostB, list), false)
+  t.equal(utils.isInList(hostC, list), false)
+  t.equal(utils.isInList(hostD, list), false)
 })

@@ -1,7 +1,6 @@
 const http = require('http')
 const url = require('url')
 const net = require('net')
-const { logJSON } = require('../utils/logger.js')
 const { isInList } = require('../utils/utils.js')
 
 /**
@@ -16,7 +15,7 @@ const localhost = '127.0.0.1'
  * 
  * @param  {Number}   port                https server port
  * @param  {Array}    httpsWhiteList      domains list that needs to be intercepted
- * @param  {[type]}   allHttpsDecryption  if true, all https should be intercepted
+ * @param  {Boolean}  allHttpsDecryption  if true, all https should be intercepted
  * @return {Function}                     connect handler function
  */
 function makeConnectHandler(port, httpsWhiteList, allHttpsDecryption) {

@@ -6,6 +6,7 @@
     "build": "babel ./src --out-dir build",
     "dev": "babel ./src --watch --out-dir build",
     "test": "tape test/**/*.js | tap-notify | tap-diff",
+    "test-utils": "tape test/utils/*.js | tap-notify | tap-diff",
     "test-server": "node test/server.js"
   },
   "author": "ohmyxm",
@@ -20,6 +21,7 @@
   "devDependencies": {
     "babel-cli": "^6.22.2",
     "babel-plugin-transform-async-to-generator": "^6.22.0",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "tape": "^4.6.3"
   }
 }

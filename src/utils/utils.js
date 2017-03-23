@@ -5,7 +5,9 @@ const url = require('url')
  */
 
 exports.checkOptions = function(options) {
-  const result = { ...options }
+  const result = { 
+    ...options 
+  }
   const {
     httpPort,
     httpsPort,
@@ -36,11 +38,13 @@ exports.checkOptions = function(options) {
 exports.isInList = function(hostname, list) {
   for (let domain of list) {
     const regString = domain.split('.').join('\\\\.')
-    const reg = new RegExp(`${regString}$`, "gi")
+    // e.g. /\.github\.com$/gi
+    const reg = new RegExp(`\\.${regString}$`, "gi")
 
-    if (reg.test(hostname)) {
-      return true
-    }
+    // same string
+    if (hostname === domain) return true
+    // not same string, but matches
+    if (reg.test(hostname)) return true
   }
 
   return false
