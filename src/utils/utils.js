@@ -1,4 +1,5 @@
 const url = require('url')
+const tls = require('tls')
 
 /**
  * Check Transfer init options for safety
@@ -48,4 +49,17 @@ exports.isInList = function(hostname, list) {
   }
 
   return false
+}
+
+/**
+ * Create secure context for SNI
+ */
+
+exports.createContext = function(servername) {
+  
+  
+  tls.createSecureContext({
+    // key: 
+    // cert:
+  })
 }

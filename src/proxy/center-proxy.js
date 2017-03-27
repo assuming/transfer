@@ -3,7 +3,7 @@ const https = require('https')
 
 const makeRequestHandler = require('./request-handler.js')
 const makeConnectHandler = require('./connect-handler.js')
-const secureProxy = require('./secure-proxy.js')
+const SecureProxy = require('./secure-proxy.js')
 
 
 class CenterProxy {
@@ -22,12 +22,12 @@ class CenterProxy {
     this.requestHandler = makeRequestHandler(interceptors)
     this.connectHandler = makeConnectHandler(httpsPort, httpsWhiteList, allHttpsDecryption)
     
-    // 2 servers init
+    // 2 servers
     this.proxy = http.createServer()
-    this.secureProxy = secureProxy
+    this.secureProxy = new SecureProxy()
   }
 
-  start() {
+  start(cb) {
     const { httpPort, httpsPort } = this.options
 
     this.proxy
@@ -40,7 +40,7 @@ class CenterProxy {
       .listen(httpsPort)
   }
 
-  stop() {
+  stop(cb) {
 
   }
 }
