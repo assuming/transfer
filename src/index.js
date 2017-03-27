@@ -1,42 +1,67 @@
-const CenterProxy = require('./proxy/center-proxy.js')
-const { checkOptions } = require('./utils/utils.js')
+const HttpProxy = require('./proxy/http-proxy.js')
+const HttpsProxy = require('./proxy/https-proxy.js')
+const makeRequestHandler = require('./proxy/request-handler.js')
+const makeConnectHandler = require('./proxy/connect-handler.js')
+const checkOptions = require('./utils/utils.js')
+const {
+  defaultOptions,
+  CERTBASE_PATH,
+  TRANSFER_SUBJECT
+} = require('./configs.js')
+// just for testing
+const { CertBase } = require('./utils/cert-tmp.js')
 
 /**
- * Default options
- *
- * httpPort       : port for http server also known as center server
- * 
- * httpsPort      : port for https intercepting server, use 
- *                  `httpPort + 1` when not provided
- *                  
- * httpsWhiteList : list for https domains that need to be intercepted
- *
- * interceptors   : interceptors
+ * Transfer
  */
-const defaultOptions = {
-  httpPort: 7777,
-  httpsPort: 7778,
-  httpsWhiteList: [],
-  interceptors: null,
-  allHttpsDecryption: false
-}
 
 class Transfer {
   constructor(options) {
-    const _options = {
+    this.options = {
       ...defaultOptions,
       ...checkOptions(options)
     }
 
-    this.centerProxy = new CenterProxy(_options)
+    const {
+      httpPort,
+      httpsPort,
+      httpsWhiteList, 
+      allHttpsDecryption,
+      interceptors
+    } = this.options
+    
+    // init cert base
+    this.certBase = new CertBase({
+      path: CERTBASE_PATH,
+      subject: TRANSFER_SUBJECT
+    })
+
+    // event listeners
+    this.requestHandler = makeRequestHandler(interceptors)
+    this.connectHandler = makeConnectHandler(httpsPort, httpsWhiteList, allHttpsDecryption)
+
+    // init 2 proxies
+    this.httpProxy = new HttpProxy({ port: httpPort })
+    this.httpsProxy = new HttpsProxy({
+      port: httpsPort,
+      // certBase: 
+    })
   }
 
-  start() {
-    this.centerProxy.start()
+  async start() {
+    await this.httpProxy
+      .on('request', this.requestHandler)
+      .on('connect', this.connectHandler)
+      .start()
+
+    await this.httpsProxy
+      .on('request', this.requestHandler)
+      .start()
+
+    return true
   }
 
-  stop() {
-    this.centerProxy.stop()
+  async stop() {
   }
 }
 

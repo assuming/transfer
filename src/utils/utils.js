@@ -13,7 +13,6 @@ exports.checkOptions = function(options) {
     httpPort,
     httpsPort,
     httpsWhiteList,
-    interceptprs,
     allHttpsDecryption
   } = options
 
@@ -30,6 +29,15 @@ exports.checkOptions = function(options) {
   }
 
   return options
+}
+
+/**
+ * Make path for '~/'
+ */
+
+exports.getHomePath = function() {
+  // TODO: maybe I can get Windows support, but I'm lazy
+  return process.env.HOME
 }
 
 /**
@@ -56,8 +64,8 @@ exports.isInList = function(hostname, list) {
  */
 
 exports.createContext = function(servername) {
-  
-  
+
+
   tls.createSecureContext({
     // key: 
     // cert:
