@@ -41,12 +41,12 @@ exports.getHomePath = function() {
 }
 
 /**
- * Check if a given host matches anything in the white list
+ * Check if a given host matches any domain in the whitelist
  */
 
 exports.isInList = function(hostname, list) {
   for (let domain of list) {
-    const regString = domain.split('.').join('\\\\.')
+    const regString = domain.split('.').join('\\.')
     // e.g. /\.github\.com$/gi
     const reg = new RegExp(`\\.${regString}$`, "gi")
 
@@ -57,17 +57,4 @@ exports.isInList = function(hostname, list) {
   }
 
   return false
-}
-
-/**
- * Create secure context for SNI
- */
-
-exports.createContext = function(servername) {
-
-
-  tls.createSecureContext({
-    // key: 
-    // cert:
-  })
 }
