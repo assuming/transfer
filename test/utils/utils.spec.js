@@ -18,7 +18,7 @@ test('isInList', function(t) {
   const hostD = 'api.fxxkapple.com' // false
 
   const list = [
-    'google.com', 
+    'google.com',
     'apple.com',
     'api.github.com'
   ]
@@ -27,4 +27,16 @@ test('isInList', function(t) {
   t.equal(utils.isInList(hostB, list), true)
   t.equal(utils.isInList(hostC, list), false)
   t.equal(utils.isInList(hostD, list), false)
+})
+
+test('httpsCheck', function(t) {
+  t.plan(3)
+
+  const urlA = 'http://www.google.com'
+  const urlB = '/'
+  const urlC = '/https'
+
+  t.equal(utils.httpsCheck(urlA), false)
+  t.equal(utils.httpsCheck(urlB), true)
+  t.equal(utils.httpsCheck(urlC), true)
 })

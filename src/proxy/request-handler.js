@@ -1,6 +1,7 @@
 const http = require('http')
 const url = require('url')
 const { logJSON, logKeys } = require('../utils/logger.js')
+const { httpsCheck, assembleURL } = require('../utils/utils.js')
 
 function makeRequestHandler(interceptors) {  
   return (req, res) => {
@@ -22,13 +23,20 @@ function makeRequestHandler(interceptors) {
  */
 
 function getOptionsFromReq(req) {
-  const reqData = url.parse(req.url)
+  const isHttps = httpsCheck(req.url)
+  const defaultPort = isHttps ? 443 : 80
 
-  const isHTTPS = reqData
+  let options = {}, reqData = {}
+  if (!isHttps) {
+    reqData = url.parse(req.url)
+  } else {
+    const _url = assembleURL(req.headers.host, req.url)
+    reqData = url.parse(req.url)
+  }
 
-  const options = {
+  options = {
     host: reqData.hostname,
-    port: 80,
+    port: reqData.port || defaultPort,
     path: reqData.path,
     method: req.method,
     headers: req.headers

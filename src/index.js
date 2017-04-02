@@ -2,14 +2,15 @@ const HttpProxy = require('./proxy/http-proxy.js')
 const HttpsProxy = require('./proxy/https-proxy.js')
 const makeRequestHandler = require('./proxy/request-handler.js')
 const makeConnectHandler = require('./proxy/connect-handler.js')
-const checkOptions = require('./utils/utils.js')
+const { checkOptions } = require('./utils/utils.js')
 const {
   defaultOptions,
   CERTBASE_PATH,
+  CERTBASE_PATH_TEST,
   TRANSFER_SUBJECT
-} = require('./configs.js')
+} = require('./constants/configs.js')
 // just for testing
-const { CertBase } = require('./utils/cert-tmp.js')
+const CertBase = require('./utils/cert-tmp.js')
 
 /**
  * Transfer
@@ -27,13 +28,16 @@ class Transfer {
       httpsPort,
       httpsWhiteList, 
       allHttpsDecryption,
-      interceptors
+      interceptors,
+      opensslPath
     } = this.options
     
     // init cert base
     this.certBase = new CertBase({
-      path: CERTBASE_PATH,
-      subject: TRANSFER_SUBJECT
+      // path: CERTBASE_PATH,
+      path: CERTBASE_PATH_TEST,
+      subject: TRANSFER_SUBJECT,
+      opensslPath: opensslPath
     })
 
     // event listeners
@@ -44,7 +48,7 @@ class Transfer {
     this.httpProxy = new HttpProxy({ port: httpPort })
     this.httpsProxy = new HttpsProxy({
       port: httpsPort,
-      // certBase: 
+      certBase: this.certBase
     })
   }
 
@@ -59,9 +63,6 @@ class Transfer {
       .start()
 
     return true
-  }
-
-  async stop() {
   }
 }
 

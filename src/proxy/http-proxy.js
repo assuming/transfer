@@ -9,13 +9,12 @@ class HttpProxy {
   }
 
   on(event, cb) {
-    // register to the handlers queue
-    this.handlesMap[event] = cb
+    this.handlersMap[event] = cb
     return this
   }
 
   async start() {
-    this._attachListeners()
+    this._attachHandlers()
   
     // start proxy
     return new Promise((resolve, reject) => {
@@ -27,10 +26,6 @@ class HttpProxy {
         }
       })
     })
-  }
-
-  async stop() {
-
   }
 
   _attachHandlers() {

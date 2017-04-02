@@ -1,30 +1,51 @@
 const https = require('https')
 const url = require('url')
-const { createContext } = require('../utils/utils.js')
-
+const tls = require('tls')
+const { CA_CERT_COMMONNAME } = require('../constants/configs.js')
 
 class HttpsProxy {
   constructor(options) {
-    this.port = option.port
+    this.port = options.port
+    this.certBase = options.certBase
     this.proxy = null
     this.handlersMap = {}
   }
 
   on(event, cb) {
-    // register to the handlers queue
-    this.handlesMap[event] = cb
+    this.handlersMap[event] = cb
+    return this
   }
 
-  start(cb) {
-    // check CA
-
+  async start() {
+    // init server
+    const ca = await this._getCA()
     this.proxy = https.createServer({
-      // key:
-      // cert: 
-      SNICallback: function(servername, cb) {
-        const secureContext = createContext(servername, certBase)
-        cb(null, secureContext)
+      key: ca.key,
+      cert: ca.cert,
+      SNICallback: (servername, cb) => {
+        console.log(servername)
+        // cb(null, tls.createSecureContext({
+        //   key: ``,
+        //   cert: ``
+        // }))
+        this._getCert(servername)
+          .then(data => {
+            cb(null, tls.createSecureContext(data))
+          })
       }
+    })
+    
+    // bind listeners
+    this._attachHandlers()
+
+    return new Promise((resolve, reject) => {
+      this.proxy.listen(this.port, e => {
+        if (!e) {
+          resolve(true)
+        } else {
+          reject(e)
+        }
+      })
     })
   }
 
@@ -32,6 +53,21 @@ class HttpsProxy {
     Object.keys(this.handlersMap).forEach(event => {
       this.proxy.on(event, this.handlersMap[event])
     })
+  }
+  async _getCA() {
+    let ca = {}
+
+    try {
+      ca = await this.certBase.getCACert()
+    } catch (e) {
+      ca = await this.certBase.createCACert(CA_CERT_COMMONNAME)
+    }
+
+    return ca
+  }
+  async _getCert(hostname) {
+    const cert = await this.certBase.getCertByHost(hostname)
+    return cert
   }
 }
 

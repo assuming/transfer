@@ -1,5 +1,5 @@
 const path = require('path')
-const { getHomePath } = require('./utils/utils.js')
+const { getHomePath } = require('../utils/utils.js')
 
 /**
  * Default options
@@ -20,7 +20,7 @@ exports.defaultOptions = {
 
 // where to store certs
 exports.CERTBASE_PATH = path.join(getHomePath(), '.transfer_certs')
-exports.CERTBASE_PATH_TEST = path.join(__dirname, '../certs')
+exports.CERTBASE_PATH_TEST = path.join(__dirname, '../../certs')
 
 // default subject of transfer
 exports.TRANSFER_SUBJECT = {
@@ -28,4 +28,4 @@ exports.TRANSFER_SUBJECT = {
   organization: 'Transfer',
   organizationUnit: 'Transfer Certification Center'
 }
-exports.CA_CERT_COMMONNAME = 'Transfer_CA'
+exports.CA_CERT_COMMONNAME = 'Transfer Proxy CA'

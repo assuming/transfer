@@ -1,5 +1,6 @@
 const url = require('url')
 const tls = require('tls')
+const path = require('path')
 
 /**
  * Check Transfer init options for safety
@@ -29,6 +30,24 @@ exports.checkOptions = function(options) {
   }
 
   return options
+}
+
+/**
+ * Check req type, return true if https
+ */
+
+exports.httpsCheck = function(urlString) {
+  const result = urlString.indexOf('http://') < 0 ? true : false
+  return result
+}
+
+/**
+ * Assemble URL using given host header and path (https server)
+ */
+
+exports.assembleURL = function(host, _path) {
+  const _url = `https://${path.join(host, _path)}`
+  return _url
 }
 
 /**
