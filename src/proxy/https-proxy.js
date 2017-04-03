@@ -18,20 +18,13 @@ class HttpsProxy {
 
   async start() {
     // init server
-    const ca = await this._getCA()
+    const httpsPair = await this._getCert('Transfer HTTPS proxy')
     this.proxy = https.createServer({
-      key: ca.key,
-      cert: ca.cert,
-      SNICallback: (servername, cb) => {
-        console.log(servername)
-        // cb(null, tls.createSecureContext({
-        //   key: ``,
-        //   cert: ``
-        // }))
-        this._getCert(servername)
-          .then(data => {
-            cb(null, tls.createSecureContext(data))
-          })
+      key: httpsPair.key,
+      cert: httpsPair.cert,
+      SNICallback: async (servername, cb) => {
+        const pair = await this._getCert(servername)
+        cb(null, tls.createSecureContext(pair))
       }
     })
     

@@ -1,13 +1,16 @@
 const http = require('http')
+const https = require('https')
 const url = require('url')
 const { logJSON, logKeys } = require('../utils/logger.js')
 const { httpsCheck, assembleURL } = require('../utils/utils.js')
 
 function makeRequestHandler(interceptors) {  
   return (req, res) => {
-    const options = getOptionsFromReq(req)
+    const isHttps = httpsCheck(req.url)
+    const options = getOptionsFromReq(req, isHttps)
+    const protocol = isHttps ? https : http
 
-    const pReq = http.request(options, pRes => {
+    const pReq = protocol.request(options, pRes => {
       res.writeHead(pRes.statusCode, pRes.headers)
       pRes.pipe(res)
     }).on('error', e => {
@@ -22,8 +25,7 @@ function makeRequestHandler(interceptors) {
  * Make request options from client's incoming request
  */
 
-function getOptionsFromReq(req) {
-  const isHttps = httpsCheck(req.url)
+function getOptionsFromReq(req, isHttps) {
   const defaultPort = isHttps ? 443 : 80
 
   let options = {}, reqData = {}
@@ -31,7 +33,7 @@ function getOptionsFromReq(req) {
     reqData = url.parse(req.url)
   } else {
     const _url = assembleURL(req.headers.host, req.url)
-    reqData = url.parse(req.url)
+    reqData = url.parse(_url)
   }
 
   options = {
@@ -41,6 +43,8 @@ function getOptionsFromReq(req) {
     method: req.method,
     headers: req.headers
   }
+
+  logJSON(options)
 
   return options
 }
