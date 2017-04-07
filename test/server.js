@@ -18,3 +18,6 @@ transfer.start()
     console.log('HTTP proxy start at localhost:7777')
     console.log('HTTPS proxy start at localhost:7778')
   })
+  .catch(e => {
+    throw e
+  })

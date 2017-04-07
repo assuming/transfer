@@ -1,7 +1,6 @@
 const https = require('https')
 const url = require('url')
 const tls = require('tls')
-const { CA_CERT_COMMONNAME } = require('../constants/configs.js')
 
 class HttpsProxy {
   constructor(options) {
@@ -59,8 +58,8 @@ class HttpsProxy {
     return ca
   }
   async _getCert(hostname) {
-    const cert = await this.certBase.getCertByHost(hostname)
-    return cert
+    const pair = await this.certBase.getCertByHost(hostname)
+    return pair
   }
 }
 
