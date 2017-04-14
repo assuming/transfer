@@ -14,9 +14,10 @@ const transfer = new Transfer({
   opensslPath: '/usr/local/Cellar/openssl/1.0.2k/bin/openssl'
 })
 transfer.start()
-  .then(() => {
-    console.log('HTTP proxy start at localhost:7777')
-    console.log('HTTPS proxy start at localhost:7778')
+  .then(data => {
+    console.log(`HTTP proxy starts at ${data.httpProxy.host}:${data.httpProxy.port}`)
+    console.log(`HTTPS proxy starts at ${data.httpsProxy.host}:${data.httpsProxy.port}`)
+    console.log(`Local map server starts at ${data.mapServer.host}:${data.mapServer.port}`)
   })
   .catch(e => {
     throw e

@@ -13,19 +13,14 @@ class HttpProxy {
     return this
   }
 
-  async start() {
+  start() {
     this._attachHandlers()
-  
-    // start proxy
-    return new Promise((resolve, reject) => {
-      this.proxy.listen(this.port, e => {
-        if (!e) {
-          resolve(true)
-        } else {
-          reject(e)
-        }
-      })
-    })
+    this.proxy.listen(this.port)
+
+    return {
+      host: '0.0.0.0',
+      port: this.port
+    }
   }
 
   _attachHandlers() {

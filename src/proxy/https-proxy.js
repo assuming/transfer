@@ -29,16 +29,12 @@ class HttpsProxy {
     
     // bind listeners
     this._attachHandlers()
+    this.proxy.listen(this.port)
 
-    return new Promise((resolve, reject) => {
-      this.proxy.listen(this.port, e => {
-        if (!e) {
-          resolve(true)
-        } else {
-          reject(e)
-        }
-      })
-    })
+    return {
+      host: '0.0.0.0',
+      port: this.port
+    }
   }
 
   _attachHandlers() {
@@ -46,17 +42,7 @@ class HttpsProxy {
       this.proxy.on(event, this.handlersMap[event])
     })
   }
-  async _getCA() {
-    let ca = {}
 
-    try {
-      ca = await this.certBase.getCACert()
-    } catch (e) {
-      ca = await this.certBase.createCACert(CA_CERT_COMMONNAME)
-    }
-
-    return ca
-  }
   async _getCert(hostname) {
     const pair = await this.certBase.getCertByHost(hostname)
     return pair

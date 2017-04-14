@@ -1,6 +1,7 @@
 const url = require('url')
 const tls = require('tls')
 const path = require('path')
+const crypto = require('crypto')
 
 /**
  * Check Transfer init options for safety
@@ -51,6 +52,14 @@ exports.assembleURL = function(host, _path) {
 }
 
 /**
+ * Create random id for each session
+ */
+
+exports.randomId = function() {
+  return crypto.randomBytes(16).toString('hex')
+}
+
+/**
  * Make path for '~/'
  */
 
@@ -75,5 +84,132 @@ exports.isInList = function(hostname, list) {
     if (reg.test(hostname)) return true
   }
 
+  return false
+}
+
+/**
+ * Change http://a.com/v/ to http://a.com/v/index.html
+ */
+
+exports.fixSlash = function(urlString) {
+  let fixedUrl = urlString
+
+  const lastChar = urlString[urlString.length - 1]
+  if (lastChar === '/') {
+    fixedUrl += 'index.html'
+  }
+
+  return fixedUrl
+}
+
+/** 
+ * Check if an url is in mapRules and needs to be mapped to local
+ */
+
+exports.isMapped = function(urlString, mapRules) {
+  for (let ruleUrl of Object.keys(mapRules)) {
+    if (testMatch(urlString, ruleUrl)) {
+      return true
+    }
+  }
+
+  return false
+}
+
+/**
+ * Get mapped local file or directory path from an url
+ */
+
+exports.getMappedPath = function(urlString, mapRules) {
+  let mappedPath = ''
+
+  for (let ruleUrl of Object.keys(mapRules)) {
+    const result = testMatch(urlString, ruleUrl)
+
+    if (result) {
+      if (result.type === 'file') {
+        mappedPath = mapRules[ruleUrl]
+      } else {
+        mappedPath = path.join(mapRules[ruleUrl], result.path)
+      }
+    }
+  }
+
+  return mappedPath
+}
+
+/**
+ * If an url matches the rule, return the extracted path or return false
+ */
+
+function testMatch(urlString, rule) {
+  // match type
+  const FILE = 'file'
+  const DIR = 'directory'
+  const DIR_PATTERN = 'directory_pattern'
+
+  let result = {
+    type: FILE,
+    path: ''
+  }
+
+  // check if file mapping
+  if (urlString === rule) {
+    return result
+  }
+
+  const lastChar = rule[rule.length - 1]
+
+  // check if dir mapping
+  if (lastChar === '*') {
+    const prefix = rule.split('*')[0]
+
+    if (urlString.indexOf(prefix) !== -1) {
+      const _path = urlString.split(prefix)[1]
+
+      result.path = _path
+      result.type = DIR
+
+      return result
+    }
+  }
+
+  /**
+   * Exist but not the last char, check if dir pattern mapping
+   * 
+   * given url: http://github.com/api/v3/|gettime.min.css -> ❌
+   *                 [urlPrefix]         [filename]
+   * given url: http://github.com/api/|gettime.what.ever.name.min.css -> ✅
+   *                 [urlPrefix]         [filename]
+   * rule     : http://github.com/api/|*|.min.css
+   *                  [prefix]           [suffix]
+   *
+   * First compare urlPrefix, make sure they are the same
+   * Then match the filename pattern
+   * 
+   */
+  if (rule.indexOf('*') !== -1) {
+    let [prefix, suffix] = rule.split('*')
+    // escape dot
+    suffix = suffix.split('.').join('\\.')
+
+    const _urlArray = urlString.split('/')
+    const filename = _urlArray.pop()
+    const urlPrefix = _urlArray.join('/') + '/'
+
+    // luckily same path, then check file name pattern
+    if (prefix === urlPrefix) {
+      const reg = new RegExp(`.+${suffix}`)
+      // match!
+      if (reg.test(filename)) {
+        result.type = DIR_PATTERN,
+        result.path = filename
+
+        return result
+      }
+    }
+  }
+
+  // not dir not file not dir pattern, no match
   return false
 }

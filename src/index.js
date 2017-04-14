@@ -1,6 +1,7 @@
 const CertBase = require('cert-base')
 const HttpProxy = require('./proxy/http-proxy.js')
 const HttpsProxy = require('./proxy/https-proxy.js')
+const MapServer = require('./mapper/map-server.js')
 const makeRequestHandler = require('./proxy/request-handler.js')
 const makeConnectHandler = require('./proxy/connect-handler.js')
 const { checkOptions } = require('./utils/utils.js')
@@ -26,9 +27,7 @@ class Transfer {
     const {
       httpPort,
       httpsPort,
-      httpsWhiteList, 
-      allHttpsDecryption,
-      interceptors,
+      mapRules,
       opensslPath
     } = this.options
     
@@ -40,31 +39,47 @@ class Transfer {
       opensslPath: opensslPath
     })
 
-    // event listeners
-    this.requestHandler = makeRequestHandler(interceptors)
-    this.connectHandler = makeConnectHandler(httpsPort, httpsWhiteList, allHttpsDecryption)
-
-    // init 2 proxies
+    // init 2 proxies and a map server
     this.httpProxy = new HttpProxy({ port: httpPort })
     this.httpsProxy = new HttpsProxy({
       port: httpsPort,
       certBase: this.certBase
     })
+    this.mapServer = new MapServer(mapRules)
   }
 
   async start() {
     await this._checkCAStatus()
 
-    await this.httpProxy
-      .on('request', this.requestHandler)
-      .on('connect', this.connectHandler)
+    const { 
+      interceptor,
+      mapRules,
+      httpsPort,
+      httpsWhiteList,
+      allHttpsDecryption
+    } = this.options
+    
+    // init map local server
+    const mapSvrInfo = this.mapServer.start()
+    
+    // init handlers
+    const requestHandler = makeRequestHandler(interceptor, mapSvrInfo.port, mapRules)
+    const connectHandler = makeConnectHandler(httpsPort, httpsWhiteList, allHttpsDecryption)
+    
+    // start 2 servers
+    const httpProxyInfo = await this.httpProxy
+      .on('request', requestHandler)
+      .on('connect', connectHandler)
       .start()
-
-    await this.httpsProxy
-      .on('request', this.requestHandler)
+    const httpsProxyInfo = await this.httpsProxy
+      .on('request', requestHandler)
       .start()
-
-    return true
+    
+    return {
+      httpProxy: httpProxyInfo,
+      httpsProxy: httpsProxyInfo,
+      mapServer: mapSvrInfo
+    }
   }
 
   async getCurrentCerts() {
