@@ -19,7 +19,6 @@
   },
   "devDependencies": {
     "babel-cli": "^6.22.2",
-    "babel-plugin-transform-async-to-generator": "^6.22.0",
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "blue-tape": "^1.0.0",
     "tape": "^4.6.3"
