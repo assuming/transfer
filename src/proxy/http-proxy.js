@@ -8,19 +8,23 @@ class HttpProxy {
     this.handlersMap = {}
   }
 
-  on(event, cb) {
-    this.handlersMap[event] = cb
-    return this
-  }
-
   start() {
     this._attachHandlers()
     this.proxy.listen(this.port)
+  }
+  stop() {
 
+  }
+  
+  getInfo() {
     return {
-      host: '0.0.0.0',
       port: this.port
     }
+  }
+
+  on(event, cb) {
+    this.handlersMap[event] = cb
+    return this
   }
 
   _attachHandlers() {

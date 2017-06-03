@@ -22,17 +22,13 @@ const MIME_TYPES = {
   'doc': 'application/msword'
 }
 
-
 /**
  * Map server's request handler creator
- * 
- * @param  {Object}   mapRules user defined map rules object
- * @return {Function}          requestHandler for map server
  */
-function createMapRequestHandler(mapRules) {
+
+function createMapRequestHandler() {
   return (req, res) => {
-    const urlData = url.parse(req.url)
-    const filepath = getMappedPath(req.url, mapRules)
+    const filepath = req.url
 
     if (fs.existsSync(filepath)) {
       // set mime type and status code

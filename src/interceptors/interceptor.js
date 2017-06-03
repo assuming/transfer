@@ -10,19 +10,25 @@ const RESPONSE_EVENT = 'response'
 const TRANSFER_EVENT = 'transfer'
 
 class Interceptor {
-  constructor(interceptor) {
-    this.reporter = new Reporter()
+  constructor(blackList) {
+    this.blackList = blackList
     this.waitingPool = {}
+    this.reporter = new Reporter()
+  }
+
+  on(event, cb) {
+    this.reporter.on(event, cb)
+  }
+
+  install(req, res, id) {
     
-    // call user defined interceptor
-    interceptor(this.reporter)
   }
 
   req(req, id) {
     // const reqInfo = 
 
     this.waitingPool[id] = { reqInfo: reqInfo }
-    this.reporter.emit('RESPONSE_EVENT', {
+    this.reporter.emit('REQUEST_EVENT', {
       id: id,
       req: reqInfo
     })

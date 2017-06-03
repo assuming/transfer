@@ -1,96 +1,85 @@
-const CertBase = require('cert-base')
 const HttpProxy = require('./proxy/http-proxy.js')
 const HttpsProxy = require('./proxy/https-proxy.js')
 const MapServer = require('./mapper/map-server.js')
-const makeRequestHandler = require('./proxy/request-handler.js')
-const makeConnectHandler = require('./proxy/connect-handler.js')
+const Interceptor = require('./interceptors/interceptor.js')
 const { checkOptions } = require('./utils/utils.js')
-const {
-  defaultOptions,
-  CERTBASE_PATH,
-  CERTBASE_PATH_TEST,
-  TRANSFER_SUBJECT,
-  CA_CERT_COMMONNAME
-} = require('./constants/configs.js')
 
-/**
- * Transfer
- */
+const { 
+  DEFAULT_INIT_OPTIONS,
+} = require('./constants/configs')
+
 
 class Transfer {
   constructor(options) {
     this.options = {
-      ...defaultOptions,
+      ...DEFAULT_INIT_OPTIONS,
       ...checkOptions(options)
     }
 
     const {
       httpPort,
       httpsPort,
+      opensslPath,
+      httpsWhiteList,
       mapRules,
-      opensslPath
+      blackList,
     } = this.options
-    
-    // init cert base
-    this.certBase = new CertBase({
-      // path: CERTBASE_PATH,
-      path: CERTBASE_PATH_TEST,
-      subject: TRANSFER_SUBJECT,
-      opensslPath: opensslPath
-    })
 
-    // init 2 proxies and a map server
     this.httpProxy = new HttpProxy({ port: httpPort })
     this.httpsProxy = new HttpsProxy({
       port: httpsPort,
-      certBase: this.certBase
+      opensslPath: opensslPath,
+      httpsWhiteList: httpsWhiteList
     })
     this.mapServer = new MapServer(mapRules)
+    this.interceptor = new Interceptor(blackList)
   }
 
   async start() {
-    await this._checkCAStatus()
-
-    const { 
-      interceptor,
-      mapRules,
-      httpsPort,
-      httpsWhiteList,
-      allHttpsDecryption
-    } = this.options
-    
-    // init map local server
-    const mapSvrInfo = this.mapServer.start()
+    // init local map server and get port && rules
+    this.mapServer.start()
     
     // init handlers
-    const requestHandler = makeRequestHandler(interceptor, mapSvrInfo.port, mapRules)
-    const connectHandler = makeConnectHandler(httpsPort, httpsWhiteList, allHttpsDecryption)
-    
-    // start 2 servers
-    const httpProxyInfo = await this.httpProxy
+    const requestHandler = createRequestHandler(this.interceptor, this.mapServer.mapFilter)
+    const connectHandler = createConnectHandler(this.httpsProxy.getInfo())
+
+    // init 2 proxies
+    await this.httpProxy
       .on('request', requestHandler)
       .on('connect', connectHandler)
       .start()
-    const httpsProxyInfo = await this.httpsProxy
+    await this.httpsProxy
       .on('request', requestHandler)
       .start()
-    
+
+    return this.getServersInfo()
+  }
+
+  stop() {
+
+  }
+
+  getTransferInfo() {
     return {
-      httpProxy: httpProxyInfo,
-      httpsProxy: httpsProxyInfo,
-      mapServer: mapSvrInfo
+      httpProxy: this.httpProxy.getInfo(),
+      httpsProxy: this.httpsProxy.getInfo(),
+      mapServer: this.mapServer.getInfo()
     }
   }
 
-  async getCurrentCerts() {
-    return this.certBase.listCerts()
+  on(event, cb) {
+    this.interceptor.on(event, cb)
+    return this
   }
 
-  async _checkCAStatus() {
-    if (!this.certBase.isCAExist()) {
-      return this.certBase.createCACert(CA_CERT_COMMONNAME)
-    }
+  /**
+   * HTTPS cert management
+   */
+
+  async listCerts() {
+    return await this.httpsProxy.listCerts()
+  }
+  async removeCert(domain) {
+    return await this.httpsProxy.removeCert(domain)
   }
 }
-
-module.exports = Transfer

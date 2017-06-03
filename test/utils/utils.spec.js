@@ -42,50 +42,55 @@ test('fixSlash', async t => {
   t.equal(utils.fixSlash(urlB), 'http://github.com/api')
 })
 
-test('isMapped', async t => {
-  const testCases = {
-    // dir map
-    'http://github.com/js/gettime.js': true,
-    'http://github.com/js/time.txt': true,
-    // dir pattern map
-    'http://github.com/assets/my.min.css': true,
-    'http://github.com/assets/my.spec.fuck.min.css': true,
-    'http://github.com/assets/my.css': false,
-    'http://github.com/assets/v3/my.min.css': false,
-    // file map
-    'http://github.com/images/b.png': true,
-    'http://github.com/fonts/b.ttf': false
+test('findMappedPath', async t => {
+  const fileMatchGroup = {
+    rule: 'https://github.com/assets/main.css',
+    target: 'http://google.com/assets/main.css',
+    urls: {
+      'https://github.com/assets/main.css': 'http://google.com/assets/main.css',
+      'https://github.com/assets/old/main.css': false,
+      'https://github.com/assets/main.min.css': false
+    }
+  }
+  const dirMatchGroup = {
+    rule: 'https://github.com/assets/*',
+    target: '/User/fake/folder/*',
+    urls: {
+      'https://github.com/assets/main.css': '/User/fake/folder/main.css',
+      'https://github.com/assets/js/index.js': '/User/fake/folder/js/index.js',
+      'https://github.com/index.html': false
+    }
+  }
+  const partMatchGroup = {
+    rule: 'https://github.com/assets/*.min.css',
+    target: 'http://abc.xyz/assets/*',
+    urls: {
+      'https://github.com/assets/main.min.css': 'http://abc.xyz/assets/main.min.css',
+      'https://github.com/assets/main.what.ever.css.min.css': 'http://abc.xyz/assets/main.what.ever.css.min.css',
+      'https://github.com/assets/old/main.min.css': false,
+    }
   }
 
-  const testLocalPath = path.join(__dirname, '../')
-  const mapRules = {
-    'http://github.com/js/*': testLocalPath,
-    'http://github.com/assets/*.min.css': testLocalPath,
-    'http://github.com/images/b.png': `${testLocalPath}b.png`
-  }
+  function run(testGroup, t) {
+    const urls = testGroup.urls
+    const ruleObj = {
+      rule: testGroup.rule,
+      target: testGroup.target
+    }
 
-  Object.keys(testCases).forEach(_url => {
-    t.equal(utils.isMapped(_url, mapRules), testCases[_url])
+    Object.keys(urls).forEach(urlString => {
+      const result = utils.findMappedPath(urlString, ruleObj)
+      t.is(result, urls[urlString])
+    })
+  }
+  
+  t.test('Full Match', async t => {
+    run(fileMatchGroup, t)
   })
-})
-
-test('getMappedPath', async t => {
-  const testCases = {
-    'http://github.com/js/gettime.js': 'path/gettime.js',
-    'http://github.com/js/name.txt': 'path/name.txt',
-    'http://github.com/assets/my.min.css': 'path/my.min.css',
-    'http://github.com/assets/my.spec.fuck.min.css': 'path/my.spec.fuck.min.css',
-    'http://github.com/images/b.png': 'path/b.png'
-  }
-
-  const testLocalPath = 'path/'
-  const mapRules = {
-    'http://github.com/js/*': testLocalPath,
-    'http://github.com/assets/*.min.css': testLocalPath,
-    'http://github.com/images/b.png': `${testLocalPath}b.png`
-  }
-
-  Object.keys(testCases).forEach(_url => {
-    t.equal(utils.getMappedPath(_url, mapRules), testCases[_url])
+  t.test('Directory Match', async t => {
+    run(dirMatchGroup, t)
+  })
+  t.test('Part Match', async t => {
+    run(partMatchGroup, t)
   })
 })

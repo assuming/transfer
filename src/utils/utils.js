@@ -2,20 +2,17 @@ const url = require('url')
 const tls = require('tls')
 const path = require('path')
 const crypto = require('crypto')
+const urljoin = require('url-join')
 
 /**
  * Check Transfer init options for safety
  */
 
 exports.checkOptions = function(options) {
-  const result = { 
-    ...options 
-  }
+  const result = { ...options }
   const {
     httpPort,
-    httpsPort,
-    httpsWhiteList,
-    allHttpsDecryption
+    httpsPort
   } = options
 
   // if only one port provided, use default ports
@@ -23,11 +20,6 @@ exports.checkOptions = function(options) {
   if ((httpPort && !httpsPort) || (!httpPort && httpsPort)) {
     delete result.httpPort
     delete result.httpsPort
-  }
-  
-  // if all https intercept, no need for white list
-  if (result.allHttpsDecryption) {
-    delete result.httpsWhiteList
   }
 
   return options
@@ -102,114 +94,75 @@ exports.fixSlash = function(urlString) {
   return fixedUrl
 }
 
-/** 
- * Check if an url is in mapRules and needs to be mapped to local
- */
-
-exports.isMapped = function(urlString, mapRules) {
-  for (let ruleUrl of Object.keys(mapRules)) {
-    if (testMatch(urlString, ruleUrl)) {
-      return true
-    }
-  }
-
-  return false
-}
-
 /**
- * Get mapped local file or directory path from an url
+ * If an url matches the rule, return the final url or return false
  */
 
-exports.getMappedPath = function(urlString, mapRules) {
-  let mappedPath = ''
+exports.findMappedPath = function(urlString, ruleObj) {
+  const rule = ruleObj.rule
+  const target = ruleObj.target
+  let result = false
 
-  for (let ruleUrl of Object.keys(mapRules)) {
-    const result = testMatch(urlString, ruleUrl)
+  const ruleLastChar = rule[rule.length - 1]
 
-    if (result) {
-      if (result.type === 'file') {
-        mappedPath = mapRules[ruleUrl]
-      } else {
-        mappedPath = path.join(mapRules[ruleUrl], result.path)
-      }
-    }
-  }
-
-  return mappedPath
-}
-
-/**
- * If an url matches the rule, return the extracted path or return false
- */
-
-function testMatch(urlString, rule) {
-  // match type
-  const FILE = 'file'
-  const DIR = 'directory'
-  const DIR_PATTERN = 'directory_pattern'
-
-  let result = {
-    type: FILE,
-    path: ''
-  }
-
-  // check if file mapping
   if (urlString === rule) {
-    return result
-  }
+    /**
+     * Full match
+     * 
+     * `urlString` is the same as `rule`, just return the target url
+     */
 
-  const lastChar = rule[rule.length - 1]
+     result = target
+  } else if (ruleLastChar === '*') {
+    /**
+     * Dir match
+     * 
+     * Map requests to a directory(remote or local is both ok)
+     * 
+     * urlString : https://github.com/api/|nav.css
+     *                    [prefix]        [suffix]
+     * rule      : https://github.com/api/|*
+     * target    : https://github.com/api/old/|*
+     *                 [targetPrefix]
+     */
 
-  // check if dir mapping
-  if (lastChar === '*') {
     const prefix = rule.split('*')[0]
-
     if (urlString.indexOf(prefix) !== -1) {
-      const _path = urlString.split(prefix)[1]
+      const suffix = urlString.split(prefix)[1]
+      const targetPrefix = target.split('*')[0]
 
-      result.path = _path
-      result.type = DIR
-
-      return result
+      result = urljoin(targetPrefix, suffix)
     }
-  }
+  } else if (rule.indexOf('*') !== -1) {
+    /**
+     * Part match
+     * 
+     * urlString : https://github.com/assets／old/navbar.min.css -> ❌
+     *             https://github.com/assets/navbar.css -> ❌
+     *             https://github.com/assets/navbar.test.min.css -> ✅
+     * 
+     * rule      : https://github.com/assets/|*|.min.css
+     *                  [ruleLocation]         [fileExt]
+     * target    : https://github.com/assets/*
+     * 
+     */
 
-  /**
-   * Exist but not the last char, check if dir pattern mapping
-   * 
-   * given url: http://github.com/api/v3/|gettime.min.css -> ❌
-   *                 [urlPrefix]         [filename]
-   * given url: http://github.com/api/|gettime.what.ever.name.min.css -> ✅
-   *                 [urlPrefix]         [filename]
-   * rule     : http://github.com/api/|*|.min.css
-   *                  [prefix]           [suffix]
-   *
-   * First compare urlPrefix, make sure they are the same
-   * Then match the filename pattern
-   * 
-   */
-  if (rule.indexOf('*') !== -1) {
-    let [prefix, suffix] = rule.split('*')
-    // escape dot
-    suffix = suffix.split('.').join('\\.')
+    let [ruleLocation, fileExt] = rule.split('*')
 
-    const _urlArray = urlString.split('/')
-    const filename = _urlArray.pop()
-    const urlPrefix = _urlArray.join('/') + '/'
+    const urlArray = urlString.split('/')
+    const filename = urlArray.pop()
+    const location = urlString.split(filename)[0]
 
-    // luckily same path, then check file name pattern
-    if (prefix === urlPrefix) {
-      const reg = new RegExp(`.+${suffix}`)
-      // match!
+    if (location === ruleLocation) {
+      // convert string to excape special chars
+      const _fileExt = fileExt.split('.').join('\\.')
+      const reg = new RegExp(`.+${_fileExt}`)
+
       if (reg.test(filename)) {
-        result.type = DIR_PATTERN,
-        result.path = filename
-
-        return result
+        result = urljoin(target.split('*')[0], filename)
       }
     }
   }
 
-  // not dir not file not dir pattern, no match
-  return false
+  return result
 }

@@ -15,19 +15,18 @@ const localhost = '127.0.0.1'
  * 
  * @param  {Number}   port                https server port
  * @param  {Array}    httpsWhiteList      domains list that needs to be intercepted
- * @param  {Boolean}  allHttpsDecryption  if true, all https should be intercepted
  * @return {Function}                     connect handler function
  */
-function makeConnectHandler(port, httpsWhiteList, allHttpsDecryption) {
+function makeConnectHandler({ port, httpsWhiteList }) {
   return (req, socket, head) => {
-    const reqData = connectReqParser(req.url)
+    const reqData = url.parse(`https://${req.url}`)
 
-    if (allHttpsDecryption) {
-      // user wants to intercept all https traffic
+    if (httpsWhiteList === '*') {
+      // user wants to decrypt all https traffic
       connect(port, localhost, socket, head)
     } else {
       // if host in white list, connect local
-      // else connect directly to the real server
+      // else connect directly to the real remote server
       isInList(reqData.hostname, httpsWhiteList) ?
       connect(port, localhost, socket, head) :
       connect(reqData.port, reqData.hostname, socket, head)
@@ -49,13 +48,6 @@ function connect(port, hostname, socket, head) {
   })
 
   return pSocket
-}
-
-function connectReqParser(req) {
-  const realURL = `https://${req}`
-  const reqData = url.parse(realURL)
-
-  return reqData
 }
 
 module.exports = makeConnectHandler

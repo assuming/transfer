@@ -2,21 +2,27 @@ const path = require('path')
 const { getHomePath } = require('../utils/utils.js')
 
 /**
- * Default options
+ * Default options for transfer init
  *
  * httpPort           : port for http server
  * httpsPort          : port for https intercepting server    
  * httpsWhiteList     : list for https domains that need to be intercepted
- * interceptors       : interceptors
- * allHttpsDecryption : if true, intercept all https traffic, httpsWhiteList will be ignored
+ *                      []  -> no HTTPS traffic will be decryted
+ *                      '*' -> all HTTPS traffic will be decrypted
+ * mapRules           : object of map pattern
+ * blacklist          : list of domain names to be blocked
  */
-exports.defaultOptions = {
+exports.DEFAULT_INIT_OPTIONS = {
   httpPort: 7777,
   httpsPort: 7778,
   httpsWhiteList: [],
-  interceptors: null,
-  allHttpsDecryption: false
+  mapRules: {},
+  blacklist: []
 }
+
+/**
+ * Certification constants
+ */
 
 // where to store certs
 exports.CERTBASE_PATH = path.join(getHomePath(), '.transfer_certs')
@@ -29,3 +35,4 @@ exports.TRANSFER_SUBJECT = {
   organizationUnit: 'Transfer Certification Center'
 }
 exports.CA_CERT_COMMONNAME = 'Transfer Proxy CA'
+exports.HTTPS_SERVER_COMMONNAME = 'Transfer HTTPS proxy'

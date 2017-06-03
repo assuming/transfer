@@ -2,43 +2,30 @@ const http = require('http')
 const https = require('https')
 const url = require('url')
 const { 
-  requestInterceptor,
-  responseInterceptor
-} = require('../interceptors/interceptor.js')
-const { 
   httpsCheck, 
   assembleURL, 
-  randomId, 
-  isMapped 
+  randomId,
+  fixSlash
 } = require('../utils/utils.js')
-const { logJSON, logKeys } = require('../utils/logger.js')
-
-/**
- * Constants
- */
-
-const localhost = '127.0.0.1'
 
 
 /**
  * Request handler creator
  * 
- * @param  {Function} interceptor callback to retrieve data when events fired
- * @param  {Object}   mapServer   an instance of MapServer
- * @return {Function}             request handler function
+ * @param {Interceptor} interceptor 
+ * @param {Function}    function to map request destination
+ * @returns 
  */
-function makeRequestHandler(interceptor, mapPort, mapRules) {
-  const itr = new Interceptor(interceptor)
-
+function makeRequestHandler(interceptor, mapFilter) {
   return (req, res) => {
-    // generate id for this session
     const transferId = randomId()
-    itr.req(req, transferId)
+    interceptor.install(req, res, transferId)
 
-    const { protocol, options } = parseOptions(req, mapRules, mapPort)
+    // trun req into options and choose a protocol
+    const { protocol, options } = parseOptions(req, mapFilter)
 
     const pReq = protocol.request(options, pRes => {
-      itr.res(pRes, transferId)
+      // interceptor.res(pRes, transferId)
 
       res.writeHead(pRes.statusCode, pRes.headers)
       pRes.pipe(res)
@@ -54,15 +41,11 @@ function makeRequestHandler(interceptor, mapPort, mapRules) {
  * Make request options from client's incoming request
  */
 
-function parseOptions(req, mapRules, mapPort) {
+function parseOptions(req, mapFilter) {
   const isHttps = httpsCheck(req.url)
-  const protocol = isHttps ? https : http
-  const defaultPort = isHttps ? 443 : 80
-
-  let options = {}
-  let reqData = {}
 
   // https req is using CONNECT, should assemble path and host manually
+  let reqData = {}
   if (!isHttps) {
     reqData = url.parse(req.url)
   } else {
@@ -70,27 +53,13 @@ function parseOptions(req, mapRules, mapPort) {
     reqData = url.parse(_url)
   }
 
-  if (isMapped(fixSlash(reqData.href), mapRules)) {
-    options = {
-      host: localhost,
-      port: mapPort,
-      path: req.href,
-      method: 'GET',
-      headers: req.headers
-    }
-  } else {
-    options = {
-      host: reqData.hostname,
-      port: reqData.port || defaultPort,
-      path: reqData.path,
-      method: req.method,
-      headers: req.headers
-    }
+  // init the field except the url info part, give that to mapFilter
+  let options = {
+    method: req.method,
+    headers: req.headers
   }
 
-  logJSON(options)
-
-  return options
+  return mapFilter(fixSlash(reqData.href), options)
 }
 
 module.exports = makeRequestHandler
