@@ -2,6 +2,7 @@ const url = require('url')
 const tls = require('tls')
 const path = require('path')
 const crypto = require('crypto')
+const matcher = require('matcher')
 const urljoin = require('url-join')
 
 /**
@@ -56,7 +57,7 @@ exports.randomId = function() {
  */
 
 exports.getHomePath = function() {
-  // TODO: maybe I can get Windows support, but I'm lazy
+  // only works on *nix
   return process.env.HOME
 }
 
@@ -80,87 +81,166 @@ exports.isInList = function(hostname, list) {
 }
 
 /**
- * Change http://a.com/v/ to http://a.com/v/index.html
+ * Rule match types
  */
 
-exports.fixSlash = function(urlString) {
-  let fixedUrl = urlString
-
-  const lastChar = urlString[urlString.length - 1]
-  if (lastChar === '/') {
-    fixedUrl += 'index.html'
-  }
-
-  return fixedUrl
-}
+const FULL_MATCH = 'FULL_MATCH'
+const DIR_MATCH = 'DIR_MATCH'
+const PART_MATCH = 'PART_MATCH'
+const UNKNOWN_RULE = 'UNKNOWN_RULE'
 
 /**
- * If an url matches the rule, return the final url or return false
+ * Check if a url matches the rule
+ * Yes : returns the mapped url
+ * No  : returns false
+ * 
+ * @param   {String} urlString
+ * @param   {Object} ruleObj contains rule & target fields
+ * @returns {String} or false
  */
 
-exports.findMappedPath = function(urlString, ruleObj) {
+exports.getMapped = function(urlString, ruleObj) {
   const rule = ruleObj.rule
   const target = ruleObj.target
   let result = false
 
-  const ruleLastChar = rule[rule.length - 1]
+  const ruleType = getRuleType(ruleObj)
 
-  if (urlString === rule) {
-    /**
-     * Full match
-     * 
-     * `urlString` is the same as `rule`, just return the target url
-     */
+  if (ruleType === UNKNOWN_RULE) {
+    // throw error
+  }
 
-     result = target
-  } else if (ruleLastChar === '*') {
+  if (ruleType === FULL_MATCH) {
+    if (urlString === rule) {
+      result = target
+    }
+  } else if (ruleType === DIR_MATCH) {
     /**
-     * Dir match
+     * Directory match
      * 
      * Map requests to a directory(remote or local is both ok)
      * 
-     * urlString : https://github.com/api/|nav.css
-     *                    [prefix]        [suffix]
-     * rule      : https://github.com/api/|*
-     * target    : https://github.com/api/old/|*
-     *                 [targetPrefix]
+     * urlString : https://github.com/assets/my.css
+     * rule      : https://github.com/assets/*
+     * target    : https://github.com/old/assets/*
      */
 
-    const prefix = rule.split('*')[0]
-    if (urlString.indexOf(prefix) !== -1) {
-      const suffix = urlString.split(prefix)[1]
-      const targetPrefix = target.split('*')[0]
+    const r = matcher.isMatch(urlString, rule)
+    if (r) {
+      const dirPathRule = rule.split('*')[0]
+      const fileName = urlString.split(dirPathRule)[1]
 
-      result = urljoin(targetPrefix, suffix)
+      result = urljoin(target.split('*')[0], fileName)
     }
-  } else if (rule.indexOf('*') !== -1) {
+  } else if (ruleType === PART_MATCH) {
     /**
      * Part match
      * 
-     * urlString : https://github.com/assets／old/navbar.min.css -> ❌
-     *             https://github.com/assets/navbar.css -> ❌
-     *             https://github.com/assets/navbar.test.min.css -> ✅
+     * Wildcard filename
      * 
-     * rule      : https://github.com/assets/|*|.min.css
-     *                  [ruleLocation]         [fileExt]
-     * target    : https://github.com/assets/*
-     * 
+     * urlString : https://github.com/assets/my.css
+     * rule      : https://github.com/assets/*.css
+     * target    : https://github.com/old/assets/*
      */
 
-    let [ruleLocation, fileExt] = rule.split('*')
+    const fileName = urlString.split('/').pop()
+    const fileNameRule = rule.split('/').pop()
+    const dirPath = urlString.split(fileName)[0]
+    const dirPathRule = rule.split(fileNameRule)[0]
 
-    const urlArray = urlString.split('/')
-    const filename = urlArray.pop()
-    const location = urlString.split(filename)[0]
+    if (dirPath === dirPathRule &&
+      matcher.isMatch(fileName, fileNameRule)) {
+      result = urljoin(target.split('*')[0], fileName)
+    }
+  }
 
-    if (location === ruleLocation) {
-      // convert string to excape special chars
-      const _fileExt = fileExt.split('.').join('\\.')
-      const reg = new RegExp(`.+${_fileExt}`)
+  return result
+}
 
-      if (reg.test(filename)) {
-        result = urljoin(target.split('*')[0], filename)
-      }
+function getRuleType(ruleObj) {
+  const rule = ruleObj.rule
+  const target = ruleObj.target
+  let result = UNKNOWN_RULE
+
+  if ((rule + target).indexOf('*') === -1) {
+    /**
+     * 1. rule & target have no *
+     */
+    result = FULL_MATCH
+  } else {
+    const ruleArr = rule.split('/*')
+    const targetArr = target.split('/*')
+
+    if (ruleArr.length === 2 &&
+        targetArr.length === 2 &&
+        ruleArr[1] === '' &&
+        targetArr[1] === '') {
+      /**
+       * 1. rule & target have and only have one '/*'
+       * 2. * is the last char
+       */
+      result = DIR_MATCH
+    } else if (ruleArr.length === 2 && 
+               targetArr.length === 2 &&
+               targetArr[1] === '' &&
+               ruleArr[1].indexOf('/') === -1) {
+      /**
+       * 1. rule & target have and only have one '/*'
+       * 2. /* in rule should be the last slash
+       * 3. /* in target should be the last 2 chars
+       */
+      result = PART_MATCH
+    }
+  }
+
+  return result
+}
+
+/**
+ * Check if a given url matches the blacklist rule
+ * 
+ * @param   {String}
+ * @param   {String}
+ * @returns {Boolean}
+ */
+
+exports.isBlack = function(urlString, rule) {
+  let result = false
+  const blackType = getBlackRuleType(rule)
+
+  if (blackType === UNKNOWN_RULE) {
+    // throw error
+  }
+
+  if (blackType === FULL_MATCH) {
+    result = urlString === rule ? true : false
+  } else if (ruleType === DIR_MATCH) {
+    result = matcher.isMatch(urlString, rule) ? true : false
+  } else if (ruleType === PART_MATCH) {
+    const fileName = urlString.split('/').pop()
+    const fileNameRule = rule.split('/').pop()
+    const dirPath = urlString.split(fileName)[0]
+    const dirPathRule = rule.split(fileNameRule)[0]
+
+    if (dirPath === dirPathRule &&
+        matcher.isMatch(fileName, fileNameRule)) {
+      result = true
+    }
+  }
+}
+
+function getBlackRuleType(rule) {
+  let result = UNKNOWN_RULE
+
+  if (rule.indexOf('*') === -1) {
+    result = FULL_MATCH
+  } else {
+    const ruleArr = rule.split('/*')
+
+    if (ruleArr.length === 2 && ruleArr[1] === '') {
+      result = DIR_MATCH
+    } else if (ruleArr.length === 2 && ruleArr[1].indexOf('/') === -1) {
+      result = PART_MATCH
     }
   }
 

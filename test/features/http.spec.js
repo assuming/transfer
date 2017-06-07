@@ -5,10 +5,6 @@ const test = require('tape')
  * Test cases
  */
 
-// test('http proxing', function() {
-  
-// })
-
 const options = {
   hostname: '127.0.0.1',
   port: 7777,

@@ -34,15 +34,7 @@ test('httpsCheck', async t => {
   t.equal(utils.httpsCheck(urlC), true)
 })
 
-test('fixSlash', async t => {
-  const urlA = 'http://github.com/api/'
-  const urlB = 'http://github.com/api'
-
-  t.equal(utils.fixSlash(urlA), 'http://github.com/api/index.html')
-  t.equal(utils.fixSlash(urlB), 'http://github.com/api')
-})
-
-test('findMappedPath', async t => {
+test('getMapped', async t => {
   const fileMatchGroup = {
     rule: 'https://github.com/assets/main.css',
     target: 'http://google.com/assets/main.css',
@@ -79,18 +71,12 @@ test('findMappedPath', async t => {
     }
 
     Object.keys(urls).forEach(urlString => {
-      const result = utils.findMappedPath(urlString, ruleObj)
+      const result = utils.getMapped(urlString, ruleObj)
       t.is(result, urls[urlString])
     })
   }
   
-  t.test('Full Match', async t => {
-    run(fileMatchGroup, t)
-  })
-  t.test('Directory Match', async t => {
-    run(dirMatchGroup, t)
-  })
-  t.test('Part Match', async t => {
-    run(partMatchGroup, t)
-  })
+  t.test('Full Match', async t => run(fileMatchGroup, t))
+  t.test('Directory Match', async t => run(dirMatchGroup, t))
+  t.test('Part Match', async t => run(partMatchGroup, t))
 })

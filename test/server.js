@@ -1,4 +1,4 @@
-const Transfer = require('../build/index.js')
+const Transfer = require('../build/index')
 
 /**
  * Setup proxy
@@ -14,15 +14,16 @@ const transfer = new Transfer({
   opensslPath: '/usr/local/Cellar/openssl/1.0.2k/bin/openssl'
 })
 transfer
-  .on('request')
-  .on('response')
-  .on('transfer')
+  // .on('request')
+  // .on('response')
+  // .on('transfer')
+  .on('error', (err) => {
+    console.log('\n--------- ERROR ---------')
+    throw err
+  })
   .start()
   .then(data => {
-    console.log(`HTTP proxy starts at localhost:${data.httpProxy.port}`)
-    console.log(`HTTPS proxy starts at localhost:${data.httpsProxy.port}`)
-    console.log(`Local map server starts at localhost:${data.mapServer.port}`)
-  })
-  .catch(e => {
-    throw e
+    console.log(`HTTP port: ${data.http.port}`)
+    console.log(`HTTPS port: ${data.https.port}`)
+    console.log('Transfer start running')
   })
