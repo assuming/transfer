@@ -8,9 +8,6 @@ const { getMapped } = require('../utils/utils')
 
 /**
  * Map local/remote middleware creator
- * 
- * @param {Object} map rules
- * @returns koa middleware async function
  */
 
 function createMapper(rules) {
@@ -29,6 +26,10 @@ function createMapper(rules) {
 
       // if mapped local, respond immediately
       if (mappedUrl) {
+        ctx.state.collector.map = {
+          mapType: 'local',
+          mappedUrl: mappedUrl
+        }
         await respondLocal(ctx, mappedUrl)
         return
       }
@@ -41,7 +42,13 @@ function createMapper(rules) {
         target: remoteRules[rule]
       })
 
+      // if mapped remote, change the current url
+      // to a new one, and send as usual
       if (mappedUrl) {
+        ctx.state.collector.map = {
+          mapType: 'remote',
+          mappedUrl: mappedUrl
+        }
         ctx.request.url = mappedUrl
       }
     }

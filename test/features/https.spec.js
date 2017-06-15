@@ -28,6 +28,12 @@ req.on('connect', (res, socket, head) => {
     socket: socket,
     rejectUnauthorized: false
   }, () => {
+    // binary response
+    // skt.write('GET /img/bd_logo1.png HTTP/1.1\r\n' +
+    //           'Host: www.baidu.com\r\n' +
+    //           '\r\n')
+
+    // html response
     skt.write('GET / HTTP/1.1\r\n' +
               'Host: www.baidu.com\r\n' +
               '\r\n')

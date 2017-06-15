@@ -1,4 +1,6 @@
 const url = require('url')
+const http = require('http')
+const https = require('https')
 const tls = require('tls')
 const path = require('path')
 const crypto = require('crypto')
@@ -245,4 +247,38 @@ function getBlackRuleType(rule) {
   }
 
   return result
+}
+
+/**
+ * Take url method headers to send request
+ */
+
+exports.rq = function(options, cb) {
+  const urlData = url.parse(options.url)
+  const defaultPort = urlData.protocol === 'https:' ? 443 : 80
+  const protocol = urlData.protocol === 'https:' ? https : http
+
+  const opt = {
+    hostname: urlData.hostname,
+    port: urlData.port || defaultPort,
+    path: urlData.path,
+    method: options.method,
+    headers: options.headers
+  }
+
+  return protocol.request(opt, cb)
+}
+
+/**
+ * Consume a req or res stream and put the data in Buffer
+ */
+
+exports.getStreamData = async function(stream) {
+  return new Promise((resolve, reject) => {
+    let bufferArray = []
+    stream
+      .on('data', chunk => bufferArray.push(chunk))
+      .on('end', () => resolve(Buffer.concat(bufferArray)))
+      .on('error', e => reject(e))
+  })
 }

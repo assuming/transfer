@@ -2,9 +2,6 @@ const { isBlack } = require('../utils/utils')
 
 /**
  * Black list blocker creator
- * 
- * @param {Array} array for black rules
- * @returns koa middleware async function
  */
 
 function createBlocker(blackList) {
@@ -13,7 +10,9 @@ function createBlocker(blackList) {
 
     for (let rule of blackList) {
       if (isBlack(reqUrl, rule)) {
-        await blockRespond(ctx)
+        // mark blocked
+        ctx.state.collector.blocked = true
+        blockRespond(ctx)
         return
       }
     }
@@ -28,6 +27,7 @@ module.exports = createBlocker
  * Block the response by 404
  */
 
-async function blockRespond(ctx) {
-  
+function blockRespond(ctx) {
+  ctx.status = 404
+  ctx.body = '404 not found\n'
 }

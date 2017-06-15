@@ -15,6 +15,7 @@ const options = {
   }
 }
 
+
 let body = ''
 const req = http.request(options, res => {
   console.log(res.headers)
@@ -24,6 +25,7 @@ const req = http.request(options, res => {
   res.on('end', () => {
     console.log(body)
   })
+  res.on('error', e => console.log(`response error => ${e}`))
 })
 
 req.on('error', e => console.log(`request error => ${e}`))

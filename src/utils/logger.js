@@ -8,7 +8,7 @@ const chalk = require('chalk')
 
 exports.printReq = function(options) {
   const methodString = chalk.green(options.method)
-  console.log(`${methodString} -> ${options.url.href}`)
+  console.log(`${methodString} -> ${options.url}`)
 }
 
 /**

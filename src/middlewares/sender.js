@@ -1,37 +1,113 @@
 const http = require('http')
 const https = require('https')
 const url = require('url')
-const rq = require('request')
+const util = require('util')
+const zlib = require('zlib')
+const now = require("performance-now")
+const cleanHeaders = require('../utils/header-check/check')
 const { 
   httpsCheck, 
-  assembleURL 
+  assembleURL, 
+  rq,
+  getStreamData
 } = require('../utils/utils')
-const { printReq } = require('../utils/logger')
+const { STATUS_ERROR } = require('../constants/configs')
 
 /**
  * Request sending middleware creator
- * 
- * @returns koa middleware async function
  */
 
-function createSender() {
+function createSender(transfer) {
   return async (ctx, next) => {
+    const collector = ctx.state.collector
     const options = parseRequest(ctx.request)
 
-    printReq(options)
+    /**
+     * timings (temp object for storing data)
+     * 
+     * A little explainations:
+     * startTime  : Using Date() to get the actual time
+     *              in the world (milliseconds past since)
+     * start      : Using hrtime which is accurate when timing 
+     *              process running duration stuff like that
+     * There will be minor difference but nobody cares
+     * 
+     * startTime  - clock time when the request start
+     * start      - @ start of the request
+     * socket     - @ socket assigned
+     * lookup     - @ dns lookup finished
+     * connect    - @ tcp connection been made
+     * repsonse   - @ first byte received
+     * end        - @ last byte finished
+     * endTime    - clock time when the request end
+     */
+    const timings = {}
+    ctx.state.timings = timings
+    
+    // send request and set response headers and status code
+    // return response body buffer data
+    const bodyBuffer = await new Promise((resolve, reject) => {
+      // request start
+      timings.startTime = new Date().getTime()
+      timings.start = now()
 
-    await new Promise((resolve, reject) => {
-      const proxyReq = rq(options, (err, pRes, body) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve()
+      const proxyReq = rq(options)
+
+      // when a socket is assigned
+      proxyReq.on('socket', socket => {
+        timings.socket = now()
+        const isReuse = !socket.connecting
+
+        // if not from a reused socket
+        if (!isReuse) {
+          const onLookup = () => timings.lookup = now()
+          const onConnect = () => timings.connect = now()
+
+          socket.once('lookup', onLookup)
+          socket.once('connect', onConnect)
+
+          // when error occurs remove the socket level handler
+          // cause maybe the socket is reused?
+          // 
+          // According to request lib:
+          // https://github.com/request/request/blob/master/request.js#L797
+          proxyReq.once('error', () => {
+            socket.removeListener('lookup', onLookup)
+            socket.removeListener('connect', onConnect)
+          })
         }
       })
 
-      // req -> proxy req => server => proxy res -> res
-      ctx.req.pipe(proxyReq).pipe(ctx.res)
+      // when response's first byte arrived
+      proxyReq.on('response', proxyRes => {
+        timings.response = now()
+
+        getStreamData(proxyRes).then(bodyBuffer => {
+          // request end, I know it's a little bit late
+          timings.end = now()
+          timings.endTime = new Date().getTime()
+
+          // set status and headers for convenience
+          ctx.status = proxyRes.statusCode
+          ctx.set(cleanHeaders(proxyRes.headers))
+
+          resolve(bodyBuffer)
+        })
+      })
+
+      // if the connection broke, finished the collector
+      proxyReq.on('error', err => {
+        collector.status = STATUS_ERROR
+        transfer.emit('response', collector)
+
+        reject(err)
+      })
+
+      // send request body (if POST method)
+      proxyReq.end(ctx.request.body)
     })
+
+    ctx.body = bodyBuffer
   }
 }
 
@@ -39,9 +115,6 @@ module.exports = createSender
 
 /**
  * Make options from in-coming request
- * 
- * @param   {Object} request 
- * @returns {Object} options for request method
  */
 
 function parseRequest(request) {
@@ -55,10 +128,15 @@ function parseRequest(request) {
   }
 
   const options = {
-    url: url.parse(realUrl),
+    url: realUrl,
     method: request.method,
     headers: request.headers
   }
+
+  // since it's a debugging proxy, no need for gzip stuff.
+  // Unzip and zip the response will cost a lot time on the
+  // local machine
+  delete options.headers['accept-encoding']
 
   return options
 }

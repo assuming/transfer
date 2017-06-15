@@ -8,12 +8,6 @@ const CertBase = require('cert-base')
 const createConnectHandler = require('./handlers/connect-handler')
 const { checkOptions } = require('./utils/utils')
 
-// middlewares
-const createInterceptor = require('./middlewares/interceptor')
-const createBlocker = require('./middlewares/blocker')
-const createMapper = require('./middlewares/mapper')
-const createSender = require('./middlewares/sender')
-
 // constants
 const {
   CERTBASE_PATH,
@@ -21,8 +15,15 @@ const {
   TRANSFER_SUBJECT,
   CA_CERT_COMMONNAME,
   HTTPS_SERVER_COMMONNAME,
-  DEFAULT_INIT_OPTIONS,
+  DEFAULT_INIT_OPTIONS
 } = require('./constants/configs')
+
+
+// middlewares
+const createInterceptor = require('./middlewares/interceptor')
+const createBlocker = require('./middlewares/blocker')
+const createMapper = require('./middlewares/mapper')
+const createSender = require('./middlewares/sender')
 
 /**
  * Transfer itself is an event emitter
@@ -116,7 +117,7 @@ class Transfer extends Events {
       .use(createInterceptor(this))
       .use(createBlocker(this.options.blackList))
       .use(createMapper(this.options.mapRules))
-      .use(createSender())
+      .use(createSender(this))
 
     this.app.on('error', (err, ctx) => {
       // TODO: maybe some custom handling
