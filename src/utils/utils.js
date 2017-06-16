@@ -7,6 +7,23 @@ const crypto = require('crypto')
 const matcher = require('matcher')
 const urljoin = require('url-join')
 
+
+/**
+ * Promisified server close function
+ */
+
+exports.stopServer = function(server) {
+  return new Promise((resolve, reject) => {
+    server.close(e => {
+      if (e) {
+        reject(e)
+      } else {
+        resolve()
+      }
+    })
+  })
+}
+
 /**
  * Check Transfer init options for safety
  */

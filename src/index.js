@@ -6,7 +6,7 @@ const Events = require('events')
 const util = require('util')
 const CertBase = require('cert-base')
 const createConnectHandler = require('./handlers/connect-handler')
-const { checkOptions } = require('./utils/utils')
+const { checkOptions, stopServer } = require('./utils/utils')
 
 // constants
 const {
@@ -65,10 +65,10 @@ class Transfer extends Events {
    */
 
   async stop() {
-    const httpClose = util.promisify(this.httpProxy.close)
-    const httpsClose = util.promisify(this.httpsProxy.close)
-
-    return await Promise.all([httpClose(), httpsClose()])
+    return Promise.all([
+      stopServer(this.httpProxy),
+      stopServer(this.httpsProxy)
+    ])
   }
 
   /**
@@ -131,8 +131,10 @@ class Transfer extends Events {
 
   async mount() {
     const { httpPort, httpsPort, httpsWhiteList } = this.options
+
+    // common request and CONNECT event handler
     const reqHandler = this.app.callback()
-    const connectHandler = createConnectHandler(httpsPort, httpsWhiteList)
+    const connectHandler = createConnectHandler(httpsPort, httpsWhiteList, this)
 
     // ensure that CA exist
     if (!this.certs.isCAExist()) {

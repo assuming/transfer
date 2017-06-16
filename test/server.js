@@ -39,7 +39,11 @@ transfer
   })
 
 setTimeout(function() {
-  transfer.stop().catch(e => {
-    throw e
-  })
+  transfer.stop()
+    .then(() => {
+      console.log('Transfer shutdown')
+    })
+    .catch(e => {
+      throw e
+    })
 }, 2000);
