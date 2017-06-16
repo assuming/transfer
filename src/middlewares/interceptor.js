@@ -5,7 +5,8 @@ const {
   STATUS_ERROR,
   STATUS_FETCHING,
   STATUS_FINISHED,
-  DEFAULT_COLLECTOR_DATA
+  DEFAULT_COLLECTOR_DATA,
+  DEFAULT_TIMINGS
 } = require('../constants/configs')
 
 /**
@@ -18,6 +19,28 @@ function createInterceptor(transfer) {
     ctx.state.collector = {
       ...DEFAULT_COLLECTOR_DATA,
       id: randomId()
+    }
+    /**
+     * state.timings (object for storing temp timings data)
+     * 
+     * A little explainations:
+     * startTime  : Using Date() to get the actual time
+     *              in the world (milliseconds past since)
+     * start      : Using hrtime which is accurate when timing 
+     *              process running duration stuff like that
+     * There will be minor difference but nobody cares
+     * 
+     * startTime  - clock time when the request start
+     * start      - @ start of the request
+     * socket     - @ socket assigned
+     * lookup     - @ dns lookup finished
+     * connect    - @ tcp connection been made
+     * repsonse   - @ first byte received
+     * end        - @ last byte finished
+     * endTime    - clock time when the request end
+     */
+    ctx.state.timings = {
+      ...DEFAULT_TIMINGS
     }
 
     await markRequest(ctx)
@@ -64,7 +87,7 @@ async function markRequest(ctx) {
 function getRawRequest(ctx) {
   const headerContent = Object.keys(ctx.headers).map(h => {
     return `${h}:${ctx.headers[h]}`
-  }).join('\n') + '\n'
+  }).join('\n') + '\n\n'
   const startLine = `${ctx.method} ${ctx.path} HTTP/${ctx.req.httpVersion}\n`
   const rawBody = ctx.request.body.toString()
 
@@ -118,7 +141,7 @@ async function markResponse(ctx) {
 function getRawResponse(ctx) {
   const headerContent = Object.keys(ctx.response.headers).map(h => {
     return `${h}:${ctx.response.headers[h]}`
-  }).join('\n') + '\n'
+  }).join('\n') + '\n\n'
   const startLine = `HTTP/${ctx.req.httpVersion}\n ${ctx.status} ${ctx.message}\n`
   const rawBody = ctx.body.toString()
 
@@ -134,6 +157,21 @@ function getRawResponse(ctx) {
  */
 
 function calcTime(timings) {
+  // fill out all the blank fields in case that some
+  // sockets got reused (keep-alive)
+  if (timings.socket === 0) {
+    timings.socket = timings.start
+  }
+  if (timings.lookup === 0) {
+    timings.lookup = timings.socket 
+  }
+  if (timings.connect === 0) {
+    timings.connect = timings.lookup
+  } 
+  if (timings.response === 0) {
+    timings.response = timings.connect
+  }
+
   return {
     startTime: timings.startTime,
     wait: timings.socket - timings.start,

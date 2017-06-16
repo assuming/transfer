@@ -126,7 +126,8 @@ exports.getMapped = function(urlString, ruleObj) {
   const ruleType = getRuleType(ruleObj)
 
   if (ruleType === UNKNOWN_RULE) {
-    // throw error
+    // currently we do nothing
+    // TODO: throw error
   }
 
   if (ruleType === FULL_MATCH) {
@@ -228,14 +229,15 @@ exports.isBlack = function(urlString, rule) {
   const blackType = getBlackRuleType(rule)
 
   if (blackType === UNKNOWN_RULE) {
-    // throw error
+    // currently we do nothing
+    // TODO: throw error
   }
 
   if (blackType === FULL_MATCH) {
     result = urlString === rule ? true : false
-  } else if (ruleType === DIR_MATCH) {
+  } else if (blackType === DIR_MATCH) {
     result = matcher.isMatch(urlString, rule) ? true : false
-  } else if (ruleType === PART_MATCH) {
+  } else if (blackType === PART_MATCH) {
     const fileName = urlString.split('/').pop()
     const fileNameRule = rule.split('/').pop()
     const dirPath = urlString.split(fileName)[0]
@@ -246,6 +248,8 @@ exports.isBlack = function(urlString, rule) {
       result = true
     }
   }
+
+  return result
 }
 
 function getBlackRuleType(rule) {

@@ -80,3 +80,48 @@ test('getMapped', async t => {
   t.test('Directory Match', async t => run(dirMatchGroup, t))
   t.test('Part Match', async t => run(partMatchGroup, t))
 })
+
+test('isBlack', async t => {
+  const fullMatchGroup = {
+    rule: 'https://github.com/index.html',
+    urls: {
+      'https://github.com/index.html': true,
+      'http://github.com/index.html': false,
+      'https://github.com/': false
+    }
+  }
+
+  const dirMatchGroup = {
+    rule: 'https://github.com/assets/*',
+    urls: {
+      'https://github.com/assets/index.css': true,
+      'https://github.com/assets/css/index.css': true,
+      'https://github.com/assets/': true,
+      'http://github.com/asset/index.css': false,
+      'https://github.com/assets': false,
+    }
+  }
+
+  const partMatchGroup = {
+    rule: 'https://github.com/assets/*.min.css',
+    urls: {
+      'https://github.com/assets/index.min.css': true,
+      'https://github.com/assets/index.lol.min.css': true,
+      'https://github.com/assets/css/index.min.css': false,
+      'https://github.com/assets/index.css': false,
+    }
+  }
+  
+  function run(group, t) {
+    const rule = group.rule
+    const urls = group.urls
+
+    Object.keys(urls).forEach(url => {
+      t.is(utils.isBlack(url, rule), urls[url])
+    })
+  }
+
+  t.test('Full Match', async t => run(fullMatchGroup, t))
+  t.test('Dir Match', async t => run(dirMatchGroup, t))
+  t.test('Part Match', async t => run(partMatchGroup, t))
+})

@@ -22,27 +22,7 @@ function createSender(transfer) {
     const collector = ctx.state.collector
     const options = parseRequest(ctx.request)
 
-    /**
-     * timings (temp object for storing data)
-     * 
-     * A little explainations:
-     * startTime  : Using Date() to get the actual time
-     *              in the world (milliseconds past since)
-     * start      : Using hrtime which is accurate when timing 
-     *              process running duration stuff like that
-     * There will be minor difference but nobody cares
-     * 
-     * startTime  - clock time when the request start
-     * start      - @ start of the request
-     * socket     - @ socket assigned
-     * lookup     - @ dns lookup finished
-     * connect    - @ tcp connection been made
-     * repsonse   - @ first byte received
-     * end        - @ last byte finished
-     * endTime    - clock time when the request end
-     */
-    const timings = {}
-    ctx.state.timings = timings
+    const timings = ctx.state.timings
     
     // send request and set response headers and status code
     // return response body buffer data

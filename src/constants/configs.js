@@ -102,3 +102,14 @@ exports.DEFAULT_CONNECT_DATA = {
     endTime: 0
   }
 }
+
+exports.DEFAULT_TIMINGS = {
+  startTime: 0,
+  start: 0,
+  socket: 0,
+  lookup: 0,
+  connect: 0,
+  response: 0,
+  end: 0,
+  endTime: 0
+}

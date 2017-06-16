@@ -13,7 +13,7 @@ const transfer = new Transfer({
     'zhihu.com',
     'google.com'
   ],
-  blackList: ['ohmyxm.xyz'],
+  blackList: ['http://ohmyxm.xyz/'],
   opensslPath: '/usr/local/Cellar/openssl/1.0.2k/bin/openssl'
 })
 transfer
@@ -38,12 +38,12 @@ transfer
     console.log(`Transfer start running at ${data.http.port} & ${data.https.port}`)
   })
 
-setTimeout(function() {
-  transfer.stop()
-    .then(() => {
-      console.log('Transfer shutdown')
-    })
-    .catch(e => {
-      throw e
-    })
-}, 2000);
+// setTimeout(function() {
+//   transfer.stop()
+//     .then(() => {
+//       console.log('Transfer shutdown')
+//     })
+//     .catch(e => {
+//       throw e
+//     })
+// }, 2000);

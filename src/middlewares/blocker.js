@@ -29,5 +29,5 @@ module.exports = createBlocker
 
 function blockRespond(ctx) {
   ctx.status = 404
-  ctx.body = '404 not found\n'
+  ctx.body = 'Transfer blocked (in black list)\n'
 }
