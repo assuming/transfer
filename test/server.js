@@ -1,3 +1,4 @@
+const chalk = require('chalk')
 const Transfer = require('../build/index')
 
 /**
@@ -17,17 +18,19 @@ const transfer = new Transfer({
 })
 transfer
   .on('request', data => {
-    console.log(`${data.method} -> ${data.url}`)
+    console.log(`${chalk.green(data.method)} -> ${data.url}`)
 
-    console.log('---request---')
-    console.log(data.request)
+    console.log(chalk.blue('---request---'))
+    console.log(data)
+    console.log('\n')
   })
   .on('response', data => {
-    console.log('---response---')
+    console.log(chalk.yellow('---response---'))
     console.log(data)
+    console.log('\n')
   })
   .on('error', err => {
-    console.log('\n--------- ERROR ---------')
+    console.log(chalk.red('\n--------- ERROR ---------'))
     throw err
   })
   .start()
@@ -35,6 +38,8 @@ transfer
     console.log(`Transfer start running at ${data.http.port} & ${data.https.port}`)
   })
 
-// setTimeout(function() {
-  
-// }, 2000);
+setTimeout(function() {
+  transfer.stop().catch(e => {
+    throw e
+  })
+}, 2000);

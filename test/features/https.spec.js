@@ -10,10 +10,10 @@ const test = require('tape')
 const options = {
   hostname: '127.0.0.1',
   port: 7777,
-  path: 'www.baidu.com:443',
+  path: 'www.zhihu.com:443',
   method: 'CONNECT',
   headers: {
-    host: 'baidu.com'
+    host: 'zhihu.com'
   }
 }
 
@@ -22,8 +22,6 @@ const req = http.request(options)
 req.end()
 
 req.on('connect', (res, socket, head) => {
-  console.log('connected')
-
   const skt = tls.connect({ 
     socket: socket,
     rejectUnauthorized: false
@@ -35,8 +33,8 @@ req.on('connect', (res, socket, head) => {
 
     // html response
     skt.write('GET / HTTP/1.1\r\n' +
-              'Host: www.baidu.com\r\n' +
-              '\r\n')
+      'Host: www.zhihu.com\r\n' +
+      '\r\n')
   })
 
   skt.on('data', chunk => {

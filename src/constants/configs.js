@@ -47,13 +47,14 @@ exports.STATUS_FETCHING = 'Fetching'
 exports.STATUS_ERROR = 'Error'
 exports.STATUS_FINISHED = 'Finished'
 
-exports.DEFAULT_COLLECTOR = {
+exports.DEFAULT_COLLECTOR_DATA = {
+  crypted: false,
   id: '',
-  status: 'STATUS_FETCHING',
+  status: 'Fetching',
   url: '',
   method: '',
   protocol: '',
-  clientAddress: '',
+  protocolVersion: '',
   request: {
     raw: '',
     headers: {},
@@ -84,5 +85,20 @@ exports.DEFAULT_COLLECTOR = {
     raw: '',
     headers: {},
     body: ''
+  }
+}
+
+exports.DEFAULT_CONNECT_DATA = {
+  crypted: true,
+  id: '',
+  status: 'Fetching',
+  url: '',
+  clientAddress: '',
+
+  // when data transmitted
+  timings: {
+    startTime: 0,
+    total: 0,
+    endTime: 0
   }
 }

@@ -1,7 +1,14 @@
 const http = require('http')
 const url = require('url')
 const net = require('net')
-const { isInList } = require('../utils/utils.js')
+const now = require("performance-now")
+const { isInList, randomId } = require('../utils/utils.js')
+const { 
+  STATUS_FETCHING,
+  STATUS_ERROR,
+  STATUS_FINISHED,
+  DEFAULT_CONNECT_DATA 
+} = require('../constants/configs')
 
 /**
  * Constants
@@ -13,26 +20,65 @@ const localhost = '127.0.0.1'
 /**
  * Connect event handler creator
  * 
- * @param  {Number}   port                https server port
- * @param  {Array}    httpsWhiteList      domains list that needs to be intercepted
- * @return {Function}                     connect handler function
+ * @param  {Number}    https server port
+ * @param  {Array}     domains list that needs to be intercepted
+ * @param  {Object}    transfer instance to fire events
+ * @return {Function}  connect handler function
  */
-function createConnectHandler(port, httpsWhiteList) {
+
+function createConnectHandler(port, httpsWhiteList, transfer) {
   return (req, socket, head) => {
     const reqData = url.parse(`https://${req.url}`)
 
     if (httpsWhiteList === '*') {
-      // user wants to decrypt all https traffic
-      connect(port, localhost, socket, head)
+      // * -> intercept all https traffic
+      const pSocket = connect(port, localhost, socket, head)
     } else {
-      // if host in white list, connect local
-      // else connect directly to the real remote server
-      isInList(reqData.hostname, httpsWhiteList) ?
-        connect(port, localhost, socket, head) :
-        connect(reqData.port, reqData.hostname, socket, head)
+      if (isInList(reqData.hostname, httpsWhiteList)) {
+        // connect local https server to intercept
+        connect(port, localhost, socket, head)
+      } else {
+        // the same in interceptor
+        let startTime = new Date().getTime()
+        let start = now()
+
+        let collector = {
+          ...DEFAULT_CONNECT_DATA,
+          id: randomId(),
+          method: req.method,
+          url: req.url
+        }
+        transfer.emit('request', collector)
+
+        const pSocket = connect(reqData.port, reqData.hostname, socket, head)
+        pSocket
+          .on('end', () => {
+            collector = {
+              ...collector,
+              status: STATUS_FINISHED,
+              timings: {
+                startTime: startTime,
+                total: now() - start,
+                endTime: new Date().getTime()
+              }
+            }
+
+            transfer.emit('response', collector)
+          })
+          .on('error', e => {
+            collector.status = STATUS_ERROR
+            transfer.emit('response', collector)
+          })
+      }
     }
   }
 }
+
+module.exports = createConnectHandler
+
+/**
+ * Make tcp connection
+ */
 
 function connect(port, hostname, socket, head) {
   const pSocket = net.connect(port, hostname, () => {
@@ -43,11 +89,5 @@ function connect(port, hostname, socket, head) {
     socket.pipe(pSocket)
   })
 
-  pSocket.on('error', e => {
-    throw e
-  })
-
   return pSocket
 }
-
-module.exports = createConnectHandler

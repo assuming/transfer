@@ -5,7 +5,7 @@ const {
   STATUS_ERROR,
   STATUS_FETCHING,
   STATUS_FINISHED,
-  DEFAULT_COLLECTOR
+  DEFAULT_COLLECTOR_DATA
 } = require('../constants/configs')
 
 /**
@@ -16,7 +16,7 @@ function createInterceptor(transfer) {
   return async (ctx, next) => {
     // init collector data and assign an id
     ctx.state.collector = {
-      ...DEFAULT_COLLECTOR,
+      ...DEFAULT_COLLECTOR_DATA,
       id: randomId()
     }
 
@@ -50,7 +50,7 @@ async function markRequest(ctx) {
     url: ctx.url,
     method: ctx.method,
     protocol: ctx.protocol,
-    clientAddress: ctx.ip,
+    protocolVersion: ctx.req.httpVersion,
     request: {
       raw: getRawRequest(ctx),
       headers: ctx.headers,
