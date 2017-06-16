@@ -4,13 +4,13 @@ const { getHomePath } = require('../utils/utils.js')
 /**
  * Default options for transfer init
  *
- * httpPort           : port for http server
- * httpsPort          : port for https intercepting server    
- * httpsWhiteList     : list for https domains that need to be intercepted
- *                      []  -> no HTTPS traffic will be decryted
- *                      '*' -> all HTTPS traffic will be decrypted
- * mapRules           : object of map pattern
- * blackList          : list of domain names to be blocked
+ * - httpPort       : port for http server
+ * - httpsPort      : port for https intercepting server    
+ * - httpsWhiteList : list for https domains that need to be intercepted
+ *                    []  -> no HTTPS traffic will be decryted
+ *                    '*' -> all HTTPS traffic will be decrypted
+ * - mapRules       : object of map pattern
+ * - blackList      : list of url rules
  */
 
 exports.DEFAULT_INIT_OPTIONS = {
@@ -39,7 +39,7 @@ exports.CA_CERT_COMMONNAME = 'Transfer Proxy CA'
 exports.HTTPS_SERVER_COMMONNAME = 'Transfer HTTPS proxy'
 
 /**
- * Default intercept data object
+ * Default intercept collector object
  */
 
 // request status types

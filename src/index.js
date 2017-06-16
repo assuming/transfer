@@ -95,8 +95,8 @@ class Transfer extends Events {
   /**
    * Remove cert from the cert base
    * 
-   * @param {String} name of the cert you want to remove
-   *                 * means you want to remove all of them 
+   * @param {String} domain name of the cert you want to remove
+   *                        * means you want to remove all of them 
    */
 
   async removeCert(domain) {
@@ -141,13 +141,13 @@ class Transfer extends Events {
       await this.certs.createCACert(CA_CERT_COMMONNAME)
     }
 
-    // http proxy server needs to listen CONNECT event
+    // http proxy server needs to listen to CONNECT event
     this.httpProxy = http.createServer()
       .on('request', reqHandler)
       .on('connect', connectHandler)
       .listen(httpPort)
     
-    // create a cert for https server instance
+    // create a cert pair for https server instance
     const httpsPair = await this.certs.getCertByHost(HTTPS_SERVER_COMMONNAME)
 
     this.httpsProxy = https.createServer({

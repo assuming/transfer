@@ -20,10 +20,10 @@ const localhost = '127.0.0.1'
 /**
  * Connect event handler creator
  * 
- * @param  {Number}    https server port
- * @param  {Array}     domains list that needs to be intercepted
- * @param  {Object}    transfer instance to fire events
- * @return {Function}  connect handler function
+ * @param  {Number}   port           https server port
+ * @param  {Array}    httpsWhiteList domains list that needs to be intercepted
+ * @param  {Object}   transfer       transfer instance to fire events
+ * @return {Function} connect handler function
  */
 
 function createConnectHandler(port, httpsWhiteList, transfer) {

@@ -114,7 +114,7 @@ const UNKNOWN_RULE = 'UNKNOWN_RULE'
  * No  : returns false
  * 
  * @param   {String} urlString
- * @param   {Object} ruleObj contains rule & target fields
+ * @param   {Object} ruleObj   contains rule & target fields
  * @returns {String} or false
  */
 
@@ -219,8 +219,8 @@ function getRuleType(ruleObj) {
 /**
  * Check if a given url matches the blacklist rule
  * 
- * @param   {String}
- * @param   {String}
+ * @param   {String}  urlString given url
+ * @param   {String}  rule      black rule
  * @returns {Boolean}
  */
 

@@ -22,6 +22,7 @@ function createSender(transfer) {
     const collector = ctx.state.collector
     const options = parseRequest(ctx.request)
 
+    // get timings name for convenient
     const timings = ctx.state.timings
     
     // send request and set response headers and status code

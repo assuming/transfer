@@ -15,6 +15,7 @@ const {
 
 function createInterceptor(transfer) {
   return async (ctx, next) => {
+    // TODO: deep copy that shit!
     // init collector data and assign an id
     ctx.state.collector = {
       ...DEFAULT_COLLECTOR_DATA,
@@ -66,7 +67,7 @@ module.exports = createInterceptor
 
 async function markRequest(ctx) {
   const bodyBuffer = await getStreamData(ctx.req)
-  // mount body to ctx for request sending
+  // mount bodyBuffer to ctx for request sending
   ctx.request.body = bodyBuffer
 
   const data = {
