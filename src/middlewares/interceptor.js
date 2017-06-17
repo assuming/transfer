@@ -1,5 +1,6 @@
 const util = require('util')
 const zlib = require('zlib')
+const deepcopy = require('deepcopy')
 const { randomId, getStreamData } = require('../utils/utils')
 const {
   STATUS_ERROR,
@@ -15,12 +16,9 @@ const {
 
 function createInterceptor(transfer) {
   return async (ctx, next) => {
-    // TODO: deep copy that shit!
     // init collector data and assign an id
-    ctx.state.collector = {
-      ...DEFAULT_COLLECTOR_DATA,
-      id: randomId()
-    }
+    ctx.state.collector = deepcopy(DEFAULT_COLLECTOR_DATA)
+    ctx.state.collector.id = randomId()
     /**
      * state.timings (object for storing temp timings data)
      * 
@@ -40,9 +38,7 @@ function createInterceptor(transfer) {
      * end        - @ last byte finished
      * endTime    - clock time when the request end
      */
-    ctx.state.timings = {
-      ...DEFAULT_TIMINGS
-    }
+    ctx.state.timings = deepcopy(DEFAULT_TIMINGS)
 
     await markRequest(ctx)
     transfer.emit('request', ctx.state.collector)
