@@ -11,6 +11,7 @@ const { getHomePath } = require('../utils/utils.js')
  *                    '*' -> all HTTPS traffic will be decrypted
  * - mapRules       : object of map pattern
  * - blackList      : list of url rules
+ * - certsPath      : where to store certs
  */
 
 exports.DEFAULT_INIT_OPTIONS = {
@@ -18,7 +19,8 @@ exports.DEFAULT_INIT_OPTIONS = {
   httpsPort: 7778,
   httpsWhiteList: [],
   mapRules: {},
-  blackList: []
+  blackList: [],
+  certsPath: path.join(getHomePath(), '.transfer_certs')
 }
 
 /**
@@ -27,7 +29,6 @@ exports.DEFAULT_INIT_OPTIONS = {
 
 // where to store certs
 exports.CERTBASE_PATH = path.join(getHomePath(), '.transfer_certs')
-exports.CERTBASE_PATH_TEST = path.join(__dirname, '../../certs')
 
 // default subject of transfer
 exports.TRANSFER_SUBJECT = {
@@ -92,8 +93,8 @@ exports.DEFAULT_CONNECT_DATA = {
   crypted: true,
   id: '',
   status: 'Fetching',
+  method: 'CONNECT',
   url: '',
-  clientAddress: '',
 
   // when data transmitted
   timings: {

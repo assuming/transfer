@@ -1,3 +1,4 @@
+const path = require('path')
 const chalk = require('chalk')
 const Transfer = require('../build/index')
 
@@ -13,6 +14,7 @@ const transfer = new Transfer({
     'zhihu.com',
     'google.com'
   ],
+  certsPath: path.join(__dirname, '../certs'),
   blackList: ['http://ohmyxm.xyz/'],
   opensslPath: '/usr/local/Cellar/openssl/1.0.2k/bin/openssl'
 })
@@ -37,13 +39,3 @@ transfer
   .then(data => {
     console.log(`Transfer start running at ${data.http.port} & ${data.https.port}`)
   })
-
-// setTimeout(function() {
-//   transfer.stop()
-//     .then(() => {
-//       console.log('Transfer shutdown')
-//     })
-//     .catch(e => {
-//       throw e
-//     })
-// }, 2000);

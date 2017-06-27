@@ -10,8 +10,6 @@ const { checkOptions, stopServer } = require('./utils/utils')
 
 // constants
 const {
-  CERTBASE_PATH,
-  CERTBASE_PATH_TEST,
   TRANSFER_SUBJECT,
   CA_CERT_COMMONNAME,
   HTTPS_SERVER_COMMONNAME,
@@ -41,8 +39,7 @@ class Transfer extends Events {
     }
     this.app = new Koa()
     this.certs = new CertBase({
-      // path: CERTBASE_PATH,
-      path: CERTBASE_PATH_TEST,
+      path: this.options.certsPath,
       subject: TRANSFER_SUBJECT,
       opensslPath: this.options.opensslPath
     })

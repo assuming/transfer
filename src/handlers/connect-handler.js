@@ -45,7 +45,6 @@ function createConnectHandler(port, httpsWhiteList, transfer) {
         let collector = {
           ...DEFAULT_CONNECT_DATA,
           id: randomId(),
-          method: req.method,
           url: req.url
         }
         transfer.emit('request', collector)

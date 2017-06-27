@@ -5,7 +5,6 @@
   "scripts": {
     "build": "babel ./src --out-dir build",
     "dev": "babel ./src --watch --out-dir build",
-    "test": "tape test/**/*.js | tap-notify | tap-diff",
     "test-utils": "tape test/utils/*.js | tap-notify | tap-diff",
     "test-server": "node test/server.js"
   },
