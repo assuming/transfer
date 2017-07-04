@@ -38,14 +38,15 @@ function createConnectHandler(port, httpsWhiteList, transfer) {
         // connect local https server to intercept
         connect(port, localhost, socket, head)
       } else {
-        // the same in interceptor
+        // do the same in interceptor
         let startTime = new Date().getTime()
         let start = now()
 
         let collector = {
           ...DEFAULT_CONNECT_DATA,
           id: randomId(),
-          url: req.url
+          url: req.url,
+          protocolVersion: `HTTP/${req.httpVersion}`
         }
         transfer.emit('request', collector)
 

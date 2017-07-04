@@ -4,11 +4,11 @@ const { isBlack } = require('../utils/utils')
  * Black list blocker creator
  */
 
-function createBlocker(blackList) {
+function createBlocker(blacklist) {
   return async (ctx, next) => {
     const reqUrl = ctx.url
 
-    for (let rule of blackList) {
+    for (let rule of blacklist) {
       if (isBlack(reqUrl, rule)) {
         // mark blocked
         ctx.state.collector.blocked = true

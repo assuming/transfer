@@ -18,6 +18,7 @@ const {
 
 
 // middlewares
+const createUrlResolver = require('./middlewares/resolver')
 const createInterceptor = require('./middlewares/interceptor')
 const createBlocker = require('./middlewares/blocker')
 const createMapper = require('./middlewares/mapper')
@@ -111,8 +112,9 @@ class Transfer extends Events {
 
   install() {
     this.app
+      .use(createUrlResolver())
       .use(createInterceptor(this))
-      .use(createBlocker(this.options.blackList))
+      .use(createBlocker(this.options.blacklist))
       .use(createMapper(this.options.mapRules))
       .use(createSender(this))
 

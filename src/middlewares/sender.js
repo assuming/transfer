@@ -99,17 +99,8 @@ module.exports = createSender
  */
 
 function parseRequest(request) {
-  // check if https
-  const isHttps = httpsCheck(request.url)
-
-  // if HTTPS then assemble url
-  let realUrl = request.url
-  if (isHttps) {
-    realUrl = assembleURL(request.headers.host, request.url)
-  }
-
   const options = {
-    url: realUrl,
+    url: request.url,
     method: request.method,
     headers: request.headers
   }

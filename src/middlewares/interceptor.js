@@ -70,7 +70,7 @@ async function markRequest(ctx) {
     url: ctx.url,
     method: ctx.method,
     protocol: ctx.protocol,
-    protocolVersion: ctx.req.httpVersion,
+    protocolVersion: `HTTP/${ctx.req.httpVersion}`,
     request: {
       raw: getRawRequest(ctx),
       headers: ctx.headers,
@@ -78,7 +78,10 @@ async function markRequest(ctx) {
     }
   }
 
-  ctx.state.collector = { ...ctx.state.collector, ...data }
+  ctx.state.collector = { 
+    ...ctx.state.collector, 
+    ...data 
+  }
 }
 
 function getRawRequest(ctx) {
@@ -176,6 +179,7 @@ function calcTime(timings) {
     tcp: timings.connect - timings.lookup,
     firstByte: timings.response - timings.connect,
     download: timings.end - timings.response,
+    total: timings.end - timings.start,
     endTime: timings.endTime
   }
 }

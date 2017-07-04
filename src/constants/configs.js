@@ -10,7 +10,7 @@ const { getHomePath } = require('../utils/utils.js')
  *                    []  -> no HTTPS traffic will be decryted
  *                    '*' -> all HTTPS traffic will be decrypted
  * - mapRules       : object of map pattern
- * - blackList      : list of url rules
+ * - blacklist      : list of url rules
  * - certsPath      : where to store certs
  */
 
@@ -19,7 +19,7 @@ exports.DEFAULT_INIT_OPTIONS = {
   httpsPort: 7778,
   httpsWhiteList: [],
   mapRules: {},
-  blackList: [],
+  blacklist: [],
   certsPath: path.join(getHomePath(), '.transfer_certs')
 }
 
@@ -55,7 +55,6 @@ exports.DEFAULT_COLLECTOR_DATA = {
   url: '',
   method: '',
   protocol: '',
-  protocolVersion: '',
   request: {
     raw: '',
     headers: {},
@@ -95,6 +94,8 @@ exports.DEFAULT_CONNECT_DATA = {
   status: 'Fetching',
   method: 'CONNECT',
   url: '',
+  protocol: 'https',
+  protocolVersion: '',
 
   // when data transmitted
   timings: {

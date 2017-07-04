@@ -11,11 +11,11 @@ const transfer = new Transfer({
   httpsPort: 7778,
   httpsWhiteList: [
     'baidu.com',
-    'zhihu.com',
+    // 'zhihu.com',
     'google.com'
   ],
   certsPath: path.join(__dirname, '../certs'),
-  blackList: ['http://ohmyxm.xyz/'],
+  blacklist: [],
   opensslPath: '/usr/local/Cellar/openssl/1.0.2k/bin/openssl'
 })
 transfer
