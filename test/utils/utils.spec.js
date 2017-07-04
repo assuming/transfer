@@ -125,3 +125,8 @@ test('isBlack', async t => {
   t.test('Dir Match', async t => run(dirMatchGroup, t))
   t.test('Part Match', async t => run(partMatchGroup, t))
 })
+
+test('checkTarget', async t => {
+  t.is(utils.checkTarget('https://github.com'), true)
+  t.is(utils.checkTarget('/User/name'), false)
+})

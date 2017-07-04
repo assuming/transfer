@@ -217,6 +217,15 @@ function getRuleType(ruleObj) {
 }
 
 /**
+ * Check if a target is a remote rule
+ */
+
+exports.checkTarget = function(target) {
+  const re = /^http/g
+  return re.test(target)
+}
+
+/**
  * Check if a given url matches the blacklist rule
  * 
  * @param   {String}  urlString given url

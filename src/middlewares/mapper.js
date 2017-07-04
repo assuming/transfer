@@ -4,7 +4,7 @@ const send = require('koa-send')
 const mime = require('mime')
 const matcher = require('matcher')
 const urljoin = require('url-join')
-const { getMapped } = require('../utils/utils')
+const { getMapped, checkTarget } = require('../utils/utils')
 
 /**
  * Map local/remote middleware creator
@@ -17,39 +17,31 @@ function createMapper(rules) {
     const localRules = rules.local || {}
     const remoteRules = rules.remote || {}
 
-    // check for local rules
-    for (let rule of Object.keys(localRules)) {
+    for (let rule of Object.keys(rules)) {
+      const isRemote = checkRuleTarget(rules[rule])
+
       const mappedUrl = getMapped(reqUrl, {
         rule: rule,
-        target: localRules[rule]
+        target: rules[rule]
       })
 
-      // if mapped local, respond immediately
       if (mappedUrl) {
-        ctx.state.collector.map = {
-          mapType: 'local',
-          mappedUrl: mappedUrl
+        if (!isRemote) {
+          // local map, respond and end it
+          ctx.state.collector.map = {
+            mapType: 'local',
+            mappedUrl: mappedUrl
+          }
+          await respondLocal(ctx, mappedUrl)
+          return
+        } else {
+          // remote map, pass it to the sender
+          ctx.state.collector.map = {
+            mapType: 'remote',
+            mappedUrl: mappedUrl
+          }
+          ctx.request.url = mappedUrl
         }
-        await respondLocal(ctx, mappedUrl)
-        return
-      }
-    }
-    
-    // check for remote rules
-    for (let rule of Object.keys(remoteRules)) {
-      const mappedUrl = findMappedPath(reqUrl, {
-        rule: rule,
-        target: remoteRules[rule]
-      })
-
-      // if mapped remote, change the current url
-      // to a new one, and send as usual
-      if (mappedUrl) {
-        ctx.state.collector.map = {
-          mapType: 'remote',
-          mappedUrl: mappedUrl
-        }
-        ctx.request.url = mappedUrl
       }
     }
 

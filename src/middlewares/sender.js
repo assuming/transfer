@@ -79,6 +79,10 @@ function createSender(transfer) {
       // if the connection broke, finished the collector
       proxyReq.on('error', err => {
         collector.status = STATUS_ERROR
+        collector.timings = {
+          ...collector.timings,
+          startTime: timings.startTime
+        }
         transfer.emit('response', collector)
 
         reject(err)
