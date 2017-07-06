@@ -6,7 +6,7 @@ const { getHomePath } = require('../utils/utils.js')
  *
  * - httpPort       : port for http server
  * - httpsPort      : port for https intercepting server    
- * - httpsWhiteList : list for https domains that need to be intercepted
+ * - httpsWhitelist : list for https domains that need to be intercepted
  *                    []  -> no HTTPS traffic will be decryted
  *                    '*' -> all HTTPS traffic will be decrypted
  * - mapRules       : object of map pattern
@@ -17,7 +17,7 @@ const { getHomePath } = require('../utils/utils.js')
 exports.DEFAULT_INIT_OPTIONS = {
   httpPort: 7777,
   httpsPort: 7778,
-  httpsWhiteList: [],
+  httpsWhitelist: [],
   mapRules: {},
   blacklist: [],
   certsPath: path.join(getHomePath(), '.transfer_certs')
@@ -58,6 +58,7 @@ exports.DEFAULT_COLLECTOR_DATA = {
   request: {
     raw: '',
     headers: {},
+    cookies: {},
     body: ''
   },
 
@@ -84,6 +85,7 @@ exports.DEFAULT_COLLECTOR_DATA = {
   response: {
     raw: '',
     headers: {},
+    cookies: {},
     body: ''
   }
 }

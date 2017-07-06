@@ -13,7 +13,7 @@ const options = {
   path: 'www.zhihu.com:443',
   method: 'CONNECT',
   headers: {
-    host: 'zhihu.com'
+    host: 'www.zhihu.com'
   }
 }
 

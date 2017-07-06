@@ -21,20 +21,20 @@ const localhost = '127.0.0.1'
  * Connect event handler creator
  * 
  * @param  {Number}   port           https server port
- * @param  {Array}    httpsWhiteList domains list that needs to be intercepted
+ * @param  {Array}    httpsWhitelist domains list that needs to be intercepted
  * @param  {Object}   transfer       transfer instance to fire events
  * @return {Function} connect handler function
  */
 
-function createConnectHandler(port, httpsWhiteList, transfer) {
+function createConnectHandler(port, httpsWhitelist, transfer) {
   return (req, socket, head) => {
     const reqData = url.parse(`https://${req.url}`)
 
-    if (httpsWhiteList === '*') {
+    if (httpsWhitelist === '*') {
       // * -> intercept all https traffic
       const pSocket = connect(port, localhost, socket, head)
     } else {
-      if (isInList(reqData.hostname, httpsWhiteList)) {
+      if (isInList(reqData.hostname, httpsWhitelist)) {
         // connect local https server to intercept
         connect(port, localhost, socket, head)
       } else {
@@ -67,6 +67,7 @@ function createConnectHandler(port, httpsWhiteList, transfer) {
           })
           .on('error', e => {
             collector.status = STATUS_ERROR
+            collector.timings.startTime = startTime
             transfer.emit('response', collector)
           })
       }

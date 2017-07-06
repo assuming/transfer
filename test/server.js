@@ -9,13 +9,13 @@ const Transfer = require('../build/index')
 const transfer = new Transfer({ 
   httpPort: 7777,
   httpsPort: 7778,
-  httpsWhiteList: [
+  httpsWhitelist: [
     'baidu.com',
     'zhihu.com',
     'google.com'
   ],
   mapRules: {
-    
+    'http://ohmyxm.xyz': '/Users/ohmyxm/Code/transfer/README.md'
   },
   certsPath: path.join(__dirname, '../certs'),
   blacklist: [],
@@ -25,14 +25,14 @@ transfer
   .on('request', data => {
     console.log(`${chalk.green(data.method)} -> ${data.url}`)
 
-    console.log(chalk.blue('---request---'))
-    console.log(data)
-    console.log('\n')
+    // console.log(chalk.blue('---request---'))
+    // console.log(data)
+    // console.log('\n')
   })
   .on('response', data => {
-    console.log(chalk.yellow('---response---'))
-    console.log(data)
-    console.log('\n')
+    // console.log(chalk.yellow('---response---'))
+    // console.log(data)
+    // console.log('\n')
   })
   .on('error', err => {
     console.log(chalk.red('\n--------- ERROR ---------'))

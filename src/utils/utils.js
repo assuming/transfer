@@ -6,7 +6,7 @@ const path = require('path')
 const crypto = require('crypto')
 const matcher = require('matcher')
 const urljoin = require('url-join')
-
+const cookie = require('cookie')
 
 /**
  * Promisified server close function
@@ -311,4 +311,24 @@ exports.getStreamData = async function(stream) {
       .on('end', () => resolve(Buffer.concat(bufferArray)))
       .on('error', e => reject(e))
   })
+}
+
+/**
+ * Parse cookies in header
+ * 
+ * In 'request' object, 'cookie' header is a String
+ * In 'response' object, 'set-cookie' header is an Array
+ */
+
+exports.parseCookies = function(ck) {
+  let cookies = {}
+  if (ck) {
+    if (typeof ck === 'string') {
+      cookies = cookie.parse(ck)
+    } else {
+      cookies = cookie.parse(ck.join(';'))
+    }
+  }
+
+  return cookies
 }

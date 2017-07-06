@@ -63,15 +63,21 @@ class Transfer extends Events {
    */
 
   async stop() {
-    return Promise.all([
-      stopServer(this.httpProxy),
-      stopServer(this.httpsProxy)
-    ])
+    const httpAddr = this.httpProxy.address()
+    const httpsAddr = this.httpsProxy.address()
+
+    // if already stopped, do nothing
+    if (httpAddr && httpsAddr) {
+      return Promise.all([
+        stopServer(this.httpProxy),
+        stopServer(this.httpsProxy)
+      ])
+    }
   }
 
   /**
    * Get the 2 proxy address info
-   * 
+   *
    * @returns Object with server address
    */
 
@@ -105,7 +111,6 @@ class Transfer extends Events {
     return await this.certs.removeCert(domain)
   }
   
-
   /**
    * Install middlewares into app and listen for errors
    */
@@ -129,11 +134,11 @@ class Transfer extends Events {
    */
 
   async mount() {
-    const { httpPort, httpsPort, httpsWhiteList } = this.options
+    const { httpPort, httpsPort, httpsWhitelist } = this.options
 
     // common request and CONNECT event handler
     const reqHandler = this.app.callback()
-    const connectHandler = createConnectHandler(httpsPort, httpsWhiteList, this)
+    const connectHandler = createConnectHandler(httpsPort, httpsWhitelist, this)
 
     // ensure that CA exist
     if (!this.certs.isCAExist()) {

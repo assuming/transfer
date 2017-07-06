@@ -1,7 +1,11 @@
 const util = require('util')
 const zlib = require('zlib')
 const deepcopy = require('deepcopy')
-const { randomId, getStreamData } = require('../utils/utils')
+const { 
+  randomId, 
+  getStreamData, 
+  parseCookies 
+} = require('../utils/utils')
 const {
   STATUS_ERROR,
   STATUS_FETCHING,
@@ -63,6 +67,7 @@ module.exports = createInterceptor
 
 async function markRequest(ctx) {
   const bodyBuffer = await getStreamData(ctx.req)
+  const rawCookie = ctx.headers['cookie']
   // mount bodyBuffer to ctx for request sending
   ctx.request.body = bodyBuffer
 
@@ -74,6 +79,7 @@ async function markRequest(ctx) {
     request: {
       raw: getRawRequest(ctx),
       headers: ctx.headers,
+      cookies: parseCookies(rawCookie),
       body: bodyBuffer
     }
   }
@@ -112,6 +118,7 @@ async function markResponse(ctx) {
   // make sure response.body field get non-compress data
   let finalBody = ctx.body
   const resEncoding = ctx.response.headers['content-encoding']
+  const rawCookie = ctx.response.headers['set-cookie']
 
   // there're still some other compress algorithms but
   // seems like no one use them
@@ -123,6 +130,13 @@ async function markResponse(ctx) {
     finalBody = await inflate(ctx.body)
   }
 
+  // If provided, Node's response's 'set-cookie' header is 
+  // always an Array, need to convert it to String
+  const cookieVal = ctx.response.headers['set-cookie']
+  if (cookieVal) {
+    ctx.response.headers['set-cookie'] = cookieVal.join(';')
+  }
+
   const data = {
     status: STATUS_FINISHED,
     statusCode: ctx.status,
@@ -131,6 +145,7 @@ async function markResponse(ctx) {
     response: {
       raw: await getRawResponse(ctx),
       headers: ctx.response.headers,
+      cookies: parseCookies(rawCookie),
       body: finalBody
     }
   }
@@ -142,7 +157,7 @@ function getRawResponse(ctx) {
   const headerContent = Object.keys(ctx.response.headers).map(h => {
     return `${h}:${ctx.response.headers[h]}`
   }).join('\n') + '\n\n'
-  const startLine = `HTTP/${ctx.req.httpVersion}\n ${ctx.status} ${ctx.message}\n`
+  const startLine = `HTTP/${ctx.req.httpVersion} ${ctx.status} ${ctx.message}\n`
   const rawBody = ctx.body.toString()
 
   return startLine + headerContent + rawBody

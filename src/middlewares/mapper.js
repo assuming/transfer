@@ -1,6 +1,6 @@
 const url = require('url')
+const util = require('util')
 const fs = require('fs')
-const send = require('koa-send')
 const mime = require('mime')
 const matcher = require('matcher')
 const urljoin = require('url-join')
@@ -18,7 +18,7 @@ function createMapper(rules) {
     const remoteRules = rules.remote || {}
 
     for (let rule of Object.keys(rules)) {
-      const isRemote = checkRuleTarget(rules[rule])
+      const isRemote = checkTarget(rules[rule])
 
       const mappedUrl = getMapped(reqUrl, {
         rule: rule,
@@ -35,12 +35,16 @@ function createMapper(rules) {
           await respondLocal(ctx, mappedUrl)
           return
         } else {
-          // remote map, pass it to the sender
+          // remote map, first mark in collector
           ctx.state.collector.map = {
             mapType: 'remote',
             mappedUrl: mappedUrl
           }
+
+          // replace the URL
           ctx.request.url = mappedUrl
+          // replace the host header with the new host
+          ctx.request.headers.host = url.parse(mappedUrl).hostname
         }
       }
     }
@@ -57,8 +61,13 @@ module.exports = createMapper
 
 async function respondLocal(ctx, filePath) {
   if (fs.existsSync(filePath)) {
+    const readFile = util.promisify(fs.readFile)
+    // serve files from the root directory
+    const bodyData = await readFile(filePath)
+
     ctx.set('Content-Type', mime.lookup(filePath))
-    await send(ctx, filePath)
+    ctx.status = 200
+    ctx.body = bodyData
   } else {
     ctx.status = 404
     ctx.body = '404 not found\n'
