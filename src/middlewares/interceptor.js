@@ -4,7 +4,8 @@ const deepcopy = require('deepcopy')
 const { 
   randomId, 
   getStreamData, 
-  parseCookies 
+  parseCookies ,
+  capitalKebab
 } = require('../utils/utils')
 const {
   STATUS_ERROR,
@@ -92,7 +93,7 @@ async function markRequest(ctx) {
 
 function getRawRequest(ctx) {
   const headerContent = Object.keys(ctx.headers).map(h => {
-    return `${h}:${ctx.headers[h]}`
+    return `${capitalKebab(h)}: ${ctx.headers[h]}`
   }).join('\n') + '\n\n'
   const startLine = `${ctx.method} ${ctx.path} HTTP/${ctx.req.httpVersion}\n`
   const rawBody = ctx.request.body.toString()
@@ -155,7 +156,7 @@ async function markResponse(ctx) {
 
 function getRawResponse(ctx) {
   const headerContent = Object.keys(ctx.response.headers).map(h => {
-    return `${h}:${ctx.response.headers[h]}`
+    return `${capitalKebab(h)}: ${ctx.response.headers[h]}`
   }).join('\n') + '\n\n'
   const startLine = `HTTP/${ctx.req.httpVersion} ${ctx.status} ${ctx.message}\n`
   const rawBody = ctx.body.toString()

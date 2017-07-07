@@ -130,3 +130,10 @@ test('checkTarget', async t => {
   t.is(utils.checkTarget('https://github.com'), true)
   t.is(utils.checkTarget('/User/name'), false)
 })
+
+test('capitalKebab', async t => {
+  t.is(utils.capitalKebab('content-type'), 'Content-Type')
+  t.is(utils.capitalKebab('connection'), 'Connection')
+  t.is(utils.capitalKebab('x'), 'X')
+  t.is(utils.capitalKebab('x-k-s-d'), 'X-K-S-D')
+})

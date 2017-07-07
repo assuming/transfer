@@ -332,3 +332,17 @@ exports.parseCookies = function(ck) {
 
   return cookies
 }
+
+/**
+ * Kebab-case first char uppercase like:
+ * 
+ * kebab-case to Kebab-Case
+ */
+
+exports.capitalKebab = function(str) {
+  const particals = str.split('-')
+
+  return particals.map(item => {
+    return item[0].toUpperCase() + item.slice(1)
+  }).join('-')
+}
