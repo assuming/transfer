@@ -1,37 +1,63 @@
 # transfer
 
-An HTTP/HTTPS proxy server for debugging use. For CLI version, click [HERE](https://github.com/assuming/transfer-cli.git)
+An HTTP/HTTPS proxy server for request/response inspection
 
-### Example
+### Installation
+
+`npm install transfer-core`
+
+## Example
 
 ```js
 const Transfer = require('transfer')
 
-const options = {
-  port: 5555,
-  interceptors: 'path/to/interceptors'
-}
-
 // instanciate a proxy server by giving transfer an option object
-const proxyServer = new Transfer(options)
+const proxyServer = new Transfer({
+  httpPort: 7777,
+  httpsPort: 7778,
+  httpsWhitelist: [
+    'google.com'
+  ]
+})
 
-proxyServer.start()
+proxyServer
+  .on('request', reqHandler)
+  .on('response', resHandler)
+  .on('error', error)
+  .start()
 ```
 
-### APIs
+## API Documentations
 
-##### options
-
-Options are used to config a proxy. It's passed to the proxy through the constructor function.
+### Constructor function
 
 ```js
-{
-  // default listening port
-  port: 5555,
-  // interceptors file path or an object containing interceptors
-  interceptors: 'path/to/interceptors'
+const transfer = new Transfer({
+  httpPort: 7777,
+  httpsPort: 7778,
+  httpsWhitelist: [],
+  mapRules: {},
+  blacklist: [],
+  // ...
+})
+```
+where
 
+- **httpPort** port number of the http server
+- **httpsPort** port number of the https server
+- **httpsWhitelist** array of https domains which need to be inspected:
+```js
+[
+  // github.com and its sub domain will be HTTPS decrypted
+  'github.com', 
+  // sub.github.com and its sub domain will be HTTPS decrypted
+  'sub.github.com'
+]
+```
+- **mapRules** an object of URL mapping rules:
+```js
+{
+  'http://github.com': 'http://other.com'
 }
 ```
 
-##### Filters

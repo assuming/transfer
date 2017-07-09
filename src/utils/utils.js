@@ -127,7 +127,6 @@ exports.getMapped = function(urlString, ruleObj) {
 
   if (ruleType === UNKNOWN_RULE) {
     // currently we do nothing
-    // TODO: throw error
   }
 
   if (ruleType === FULL_MATCH) {
@@ -239,7 +238,6 @@ exports.isBlack = function(urlString, rule) {
 
   if (blackType === UNKNOWN_RULE) {
     // currently we do nothing
-    // TODO: throw error
   }
 
   if (blackType === FULL_MATCH) {

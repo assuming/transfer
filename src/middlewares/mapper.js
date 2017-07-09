@@ -14,9 +14,6 @@ function createMapper(rules) {
   return async (ctx, next) => {
     const reqUrl = ctx.url
 
-    const localRules = rules.local || {}
-    const remoteRules = rules.remote || {}
-
     for (let rule of Object.keys(rules)) {
       const isRemote = checkTarget(rules[rule])
 
