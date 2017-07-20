@@ -46,7 +46,7 @@ class Transfer extends Events {
     })
 
     // initialize all the middlewares
-    this.install()
+    this._install()
   }
 
   /**
@@ -54,7 +54,7 @@ class Transfer extends Events {
    */
 
   async start() {
-    await this.mount()
+    await this._mount()
     return this.getStatus()
   }
 
@@ -115,7 +115,7 @@ class Transfer extends Events {
    * Install middlewares into app and listen for errors
    */
 
-  install() {
+  _install() {
     this.app
       .use(createUrlResolver())
       .use(createInterceptor(this))
@@ -133,7 +133,7 @@ class Transfer extends Events {
    * Create 2 proxies and mount koa to them
    */
 
-  async mount() {
+  async _mount() {
     const { httpPort, httpsPort, httpsWhitelist } = this.options
 
     // common request and CONNECT event handler

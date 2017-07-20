@@ -19,10 +19,9 @@ const { STATUS_ERROR } = require('../constants/configs')
 function createSender(transfer) {
   return async (ctx, next) => {
     const collector = ctx.state.collector
-    const options = parseRequest(ctx.request)
-
-    // get timings name for convenient
     const timings = ctx.state.timings
+
+    const options = parseRequest(ctx.request)
     
     // send request and set response headers & status code
     // return response body buffer data
@@ -32,7 +31,7 @@ function createSender(transfer) {
       timings.start = now()
 
       const proxyReq = rq(options)
-        // when a socket is assigned
+        // when a socket is assigned, record the time
         .on('socket', socket => {
           timings.socket = now()
           const isReuse = !socket.connecting
@@ -65,7 +64,7 @@ function createSender(transfer) {
             timings.end = now()
             timings.endTime = new Date().getTime()
 
-            // set status and headers for convenience
+            // have to set status and headers
             ctx.status = proxyRes.statusCode
             ctx.set(cleanHeaders(proxyRes.headers))
 

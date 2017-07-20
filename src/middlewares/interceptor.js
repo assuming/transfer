@@ -4,8 +4,9 @@ const deepcopy = require('deepcopy')
 const { 
   randomId, 
   getStreamData, 
-  parseCookies ,
-  capitalKebab
+  parseCookies,
+  capitalKebab,
+  parseQueries,
 } = require('../utils/utils')
 const {
   STATUS_ERROR,
@@ -62,14 +63,14 @@ module.exports = createInterceptor
  * 
  * request field contains
  * - raw     : raw http message, body part is converted to utf-8 string
+ * - queries : query string in url
  * - headers : headers from ctx.req
  * - body    : buffer data for body
  */
 
 async function markRequest(ctx) {
-  const bodyBuffer = await getStreamData(ctx.req)
-  const rawCookie = ctx.headers['cookie']
   // mount bodyBuffer to ctx for request sending
+  const bodyBuffer = await getStreamData(ctx.req)
   ctx.request.body = bodyBuffer
 
   const data = {
@@ -79,8 +80,9 @@ async function markRequest(ctx) {
     protocolVersion: `HTTP/${ctx.req.httpVersion}`,
     request: {
       raw: getRawRequest(ctx),
+      queries: parseQueries(ctx.url),
       headers: ctx.headers,
-      cookies: parseCookies(rawCookie),
+      cookies: parseCookies(ctx.headers.cookie),
       body: bodyBuffer
     }
   }
@@ -116,13 +118,11 @@ function getRawRequest(ctx) {
  */
 
 async function markResponse(ctx) {
-  // make sure response.body field get non-compress data
   let finalBody = ctx.body
-  const resEncoding = ctx.response.headers['content-encoding']
-  const rawCookie = ctx.response.headers['set-cookie']
 
   // there're still some other compress algorithms but
   // seems like no one use them
+  const resEncoding = ctx.response.headers['content-encoding']
   if (resEncoding === 'gzip') {
     const gunzip = util.promisify(zlib.gunzip)
     finalBody = await gunzip(ctx.body)
@@ -133,9 +133,13 @@ async function markResponse(ctx) {
 
   // If provided, Node's response's 'set-cookie' header is 
   // always an Array, need to convert it to String
+  let cookieString = ''
   const cookieVal = ctx.response.headers['set-cookie']
   if (cookieVal) {
-    ctx.response.headers['set-cookie'] = cookieVal.join(';')
+    cookieString = cookieVal.join(';')
+    // set back to Node's response header cause we want 
+    // string cookie value
+    ctx.response.headers['set-cookie'] = cookieString
   }
 
   const data = {
@@ -146,7 +150,7 @@ async function markResponse(ctx) {
     response: {
       raw: await getRawResponse(ctx),
       headers: ctx.response.headers,
-      cookies: parseCookies(rawCookie),
+      cookies: parseCookies(cookieString),
       body: finalBody
     }
   }

@@ -59,6 +59,7 @@ exports.DEFAULT_COLLECTOR_DATA = {
     raw: '',
     headers: {},
     cookies: {},
+    queries: {},
     body: ''
   },
 

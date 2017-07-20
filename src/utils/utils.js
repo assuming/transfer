@@ -1,6 +1,7 @@
 const url = require('url')
 const http = require('http')
 const https = require('https')
+const querystring = require('querystring')
 const tls = require('tls')
 const path = require('path')
 const crypto = require('crypto')
@@ -343,4 +344,13 @@ exports.capitalKebab = function(str) {
   return particals.map(item => {
     return item[0].toUpperCase() + item.slice(1)
   }).join('-')
+}
+
+/**
+ * Parser for query string
+ */
+
+exports.parseQueries = function(str) {
+  const rawQueries = str.split('?')[1]
+  return querystring(rawQueries)
 }
