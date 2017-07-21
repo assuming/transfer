@@ -13,8 +13,7 @@ const Transfer = require('transfer')
 
 // instanciate a proxy server by giving transfer an option object
 const proxyServer = new Transfer({
-  httpPort: 7777,
-  httpsPort: 7778,
+  port: 7777,
   httpsWhitelist: [
     'google.com'
   ]
