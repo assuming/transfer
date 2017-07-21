@@ -46,30 +46,30 @@ where `options` are:
 
 - **port** is the port number of the server, default `7777`
 - **httpsWhitelist** is an array of https domains which need to be inspected:
-```js
+```json
 [
   // github.com and its sub domain will be HTTPS decrypted
-  'github.com', 
+  "github.com", 
   // sub.github.com and its sub domain will be HTTPS decrypted
-  'sub.github.com'
+  "sub.github.com"
 ]
 ```
 - **mapRules** is an object of URL mapping rules:
-```js
+```json
 {
   // map an url to another path(remote path or local path is both ok)
-  'http://github.com': 'http://another.com',
+  "http://github.com": "http://another.com",
   // map a directory to another directory, the last character must be *
-  'http://github.com/*': '/path/to/directory/*'
+  "http://github.com/*": "/path/to/directory/*"
 }
 ```
 - **blacklist** is an array of url patterns that blocks request if matched:
-```js
+```json
 [
   // block an url
-  'http://github.com/main.css',
+  "http://github.com/main.css",
   // block a whole directory
-  'http://github.com/*'
+  "http://github.com/*"
 ]
 ```
 - **certsPath** is a path to a directory that used to store the certificates, default `~/.transfer_certs`
@@ -116,7 +116,7 @@ If you do not want to react to the `request` event, i.e. you just want to do som
 
 #### Data structure (except for CONNECT method) 
 
-```json
+```js
 {
   crypted: false,
   id: '',
@@ -161,7 +161,7 @@ If you do not want to react to the `request` event, i.e. you just want to do som
 
 #### Data structure for CONNECT method
 
-```json
+```js
   crypted: true,
   id: '',
   status: 'Fetching',
