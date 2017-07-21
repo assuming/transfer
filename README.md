@@ -37,7 +37,7 @@ const options = {
   mapRules: {},
   blacklist: [],
   certsPath: '/path/to/a/folder',
-  opensslPath: 'path/to/openssl/executable'
+  opensslPath: '/path/to/openssl/executable'
 }
 
 const transfer = new Transfer(options)
@@ -46,7 +46,7 @@ where `options` are:
 
 - **port** is the port number of the server, default `7777`
 - **httpsWhitelist** is an array of https domains which need to be inspected:
-```json
+```js
 [
   // github.com and its sub domain will be HTTPS decrypted
   "github.com", 
@@ -55,7 +55,7 @@ where `options` are:
 ]
 ```
 - **mapRules** is an object of URL mapping rules:
-```json
+```js
 {
   // map an url to another path(remote path or local path is both ok)
   "http://github.com": "http://another.com",
@@ -64,7 +64,7 @@ where `options` are:
 }
 ```
 - **blacklist** is an array of url patterns that blocks request if matched:
-```json
+```js
 [
   // block an url
   "http://github.com/main.css",
@@ -162,6 +162,7 @@ If you do not want to react to the `request` event, i.e. you just want to do som
 #### Data structure for CONNECT method
 
 ```js
+{
   crypted: true,
   id: '',
   status: 'Fetching',
@@ -175,6 +176,7 @@ If you do not want to react to the `request` event, i.e. you just want to do som
     total: 0,
     endTime: 0
   }
+}
 ```
 
 
@@ -182,3 +184,6 @@ If you do not want to react to the `request` event, i.e. you just want to do som
 
 ### Start and stop the proxy
 
+
+
+## Certificates explaination
