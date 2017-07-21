@@ -26,27 +26,6 @@ exports.stopServer = function(server) {
 }
 
 /**
- * Check Transfer init options for safety
- */
-
-exports.checkOptions = function(options) {
-  const result = { ...options }
-  const {
-    httpPort,
-    httpsPort
-  } = options
-
-  // if only one port provided, use default ports
-  // user must provide 2 ports
-  if ((httpPort && !httpsPort) || (!httpPort && httpsPort)) {
-    delete result.httpPort
-    delete result.httpsPort
-  }
-
-  return options
-}
-
-/**
  * Check req type, return true if https
  */
 
@@ -352,5 +331,5 @@ exports.capitalKebab = function(str) {
 
 exports.parseQueries = function(str) {
   const rawQueries = str.split('?')[1]
-  return querystring(rawQueries)
+  return querystring.parse(rawQueries)
 }

@@ -7,8 +7,7 @@ const Transfer = require('../build/index')
  */
 
 const transfer = new Transfer({ 
-  httpPort: 7777,
-  httpsPort: 7778,
+  port: 8000,
   httpsWhitelist: [
     'baidu.com',
     'zhihu.com',

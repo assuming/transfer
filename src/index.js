@@ -5,8 +5,9 @@ const tls = require('tls')
 const Events = require('events')
 const util = require('util')
 const CertBase = require('cert-base')
+const portfinder = require('portfinder')
 const createConnectHandler = require('./handlers/connect-handler')
-const { checkOptions, stopServer } = require('./utils/utils')
+const { stopServer } = require('./utils/utils')
 
 // constants
 const {
@@ -36,13 +37,13 @@ class Transfer extends Events {
     super()
     this.options = {
       ...DEFAULT_INIT_OPTIONS,
-      ...checkOptions(options)
+      ...options
     }
     this.app = new Koa()
     this.certs = new CertBase({
       path: this.options.certsPath,
+      opensslPath: this.options.opensslPath,
       subject: TRANSFER_SUBJECT,
-      opensslPath: this.options.opensslPath
     })
 
     // initialize all the middlewares
@@ -134,22 +135,20 @@ class Transfer extends Events {
    */
 
   async _mount() {
-    const { httpPort, httpsPort, httpsWhitelist } = this.options
-
-    // common request and CONNECT event handler
     const reqHandler = this.app.callback()
-    const connectHandler = createConnectHandler(httpsPort, httpsWhitelist, this)
+    const { port, httpsWhitelist } = this.options
+
+    // start http server here for port assign for https server
+    this.httpProxy = http.createServer()
+      .on('request', reqHandler)
+      .listen(port)
+    const httpsPort = await portfinder.getPortPromise()
+    this.httpProxy.on('connect', createConnectHandler(httpsPort, httpsWhitelist, this))
 
     // ensure that CA exist
     if (!this.certs.isCAExist()) {
       await this.certs.createCACert(CA_CERT_COMMONNAME)
     }
-
-    // http proxy server needs to listen to CONNECT event
-    this.httpProxy = http.createServer()
-      .on('request', reqHandler)
-      .on('connect', connectHandler)
-      .listen(httpPort)
     
     // create a cert pair for https server instance
     const httpsPair = await this.certs.getCertByHost(HTTPS_SERVER_COMMONNAME)

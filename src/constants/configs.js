@@ -4,8 +4,7 @@ const { getHomePath } = require('../utils/utils.js')
 /**
  * Default options for transfer init
  *
- * - httpPort       : port for http server
- * - httpsPort      : port for https intercepting server    
+ * - port       : port for server
  * - httpsWhitelist : list for https domains that need to be intercepted
  *                    []  -> no HTTPS traffic will be decryted
  *                    '*' -> all HTTPS traffic will be decrypted
@@ -15,8 +14,7 @@ const { getHomePath } = require('../utils/utils.js')
  */
 
 exports.DEFAULT_INIT_OPTIONS = {
-  httpPort: 7777,
-  httpsPort: 7778,
+  port: 7777,
   httpsWhitelist: [],
   mapRules: {},
   blacklist: [],
