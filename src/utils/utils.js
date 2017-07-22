@@ -85,7 +85,6 @@ exports.isInList = function(hostname, list) {
 
 const FULL_MATCH = 'FULL_MATCH'
 const DIR_MATCH = 'DIR_MATCH'
-const PART_MATCH = 'PART_MATCH'
 const UNKNOWN_RULE = 'UNKNOWN_RULE'
 
 /**
@@ -131,26 +130,6 @@ exports.getMapped = function(urlString, ruleObj) {
 
       result = urljoin(target.split('*')[0], fileName)
     }
-  } else if (ruleType === PART_MATCH) {
-    /**
-     * Part match
-     * 
-     * Wildcard filename
-     * 
-     * urlString : https://github.com/assets/my.css
-     * rule      : https://github.com/assets/*.css
-     * target    : https://github.com/old/assets/*
-     */
-
-    const fileName = urlString.split('/').pop()
-    const fileNameRule = rule.split('/').pop()
-    const dirPath = urlString.split(fileName)[0]
-    const dirPathRule = rule.split(fileNameRule)[0]
-
-    if (dirPath === dirPathRule &&
-      matcher.isMatch(fileName, fileNameRule)) {
-      result = urljoin(target.split('*')[0], fileName)
-    }
   }
 
   return result
@@ -179,16 +158,6 @@ function getRuleType(ruleObj) {
        * 2. * is the last char
        */
       result = DIR_MATCH
-    } else if (ruleArr.length === 2 && 
-               targetArr.length === 2 &&
-               targetArr[1] === '' &&
-               ruleArr[1].indexOf('/') === -1) {
-      /**
-       * 1. rule & target have and only have one '/*'
-       * 2. /* in rule should be the last slash
-       * 3. /* in target should be the last 2 chars
-       */
-      result = PART_MATCH
     }
   }
 
@@ -224,16 +193,6 @@ exports.isBlack = function(urlString, rule) {
     result = urlString === rule ? true : false
   } else if (blackType === DIR_MATCH) {
     result = matcher.isMatch(urlString, rule) ? true : false
-  } else if (blackType === PART_MATCH) {
-    const fileName = urlString.split('/').pop()
-    const fileNameRule = rule.split('/').pop()
-    const dirPath = urlString.split(fileName)[0]
-    const dirPathRule = rule.split(fileNameRule)[0]
-
-    if (dirPath === dirPathRule &&
-        matcher.isMatch(fileName, fileNameRule)) {
-      result = true
-    }
   }
 
   return result
@@ -249,8 +208,6 @@ function getBlackRuleType(rule) {
 
     if (ruleArr.length === 2 && ruleArr[1] === '') {
       result = DIR_MATCH
-    } else if (ruleArr.length === 2 && ruleArr[1].indexOf('/') === -1) {
-      result = PART_MATCH
     }
   }
 
