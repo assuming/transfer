@@ -5,13 +5,14 @@
   "scripts": {
     "build": "babel ./src --out-dir build",
     "dev": "babel ./src --watch --out-dir build",
-    "test-utils": "tape test/utils/*.js | tap-notify | tap-diff",
-    "test-server": "node test/server.js"
+    "t-utils": "tape test/utils/*.js | tap-notify | tap-diff",
+    "t-features": "tape test/features/*.js | tap-notify | tap-diff",
+    "start-server": "node test/server.js"
   },
   "author": "ohmyxm",
   "license": "ISC",
   "dependencies": {
-    "cert-base": "^1.0.0",
+    "cert-base": "^1.1.0",
     "chalk": "^1.1.3",
     "convert-hrtime": "^2.0.0",
     "cookie": "^0.3.1",

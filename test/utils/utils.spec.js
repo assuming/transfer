@@ -53,15 +53,6 @@ test('getMapped', async t => {
       'https://github.com/index.html': false
     }
   }
-  const partMatchGroup = {
-    rule: 'https://github.com/assets/*.min.css',
-    target: 'http://abc.xyz/assets/*',
-    urls: {
-      'https://github.com/assets/main.min.css': 'http://abc.xyz/assets/main.min.css',
-      'https://github.com/assets/main.what.ever.css.min.css': 'http://abc.xyz/assets/main.what.ever.css.min.css',
-      'https://github.com/assets/old/main.min.css': false,
-    }
-  }
 
   function run(testGroup, t) {
     const urls = testGroup.urls
@@ -78,7 +69,6 @@ test('getMapped', async t => {
   
   t.test('Full Match', async t => run(fileMatchGroup, t))
   t.test('Directory Match', async t => run(dirMatchGroup, t))
-  t.test('Part Match', async t => run(partMatchGroup, t))
 })
 
 test('isBlack', async t => {
@@ -101,16 +91,6 @@ test('isBlack', async t => {
       'https://github.com/assets': false,
     }
   }
-
-  const partMatchGroup = {
-    rule: 'https://github.com/assets/*.min.css',
-    urls: {
-      'https://github.com/assets/index.min.css': true,
-      'https://github.com/assets/index.lol.min.css': true,
-      'https://github.com/assets/css/index.min.css': false,
-      'https://github.com/assets/index.css': false,
-    }
-  }
   
   function run(group, t) {
     const rule = group.rule
@@ -123,7 +103,6 @@ test('isBlack', async t => {
 
   t.test('Full Match', async t => run(fullMatchGroup, t))
   t.test('Dir Match', async t => run(dirMatchGroup, t))
-  t.test('Part Match', async t => run(partMatchGroup, t))
 })
 
 test('checkTarget', async t => {
@@ -136,4 +115,9 @@ test('capitalKebab', async t => {
   t.is(utils.capitalKebab('connection'), 'Connection')
   t.is(utils.capitalKebab('x'), 'X')
   t.is(utils.capitalKebab('x-k-s-d'), 'X-K-S-D')
+})
+
+test('parseQueries', async t => {
+  const urlString = 'http://github.com/api?_t=111&year=2017'
+  t.is(utils.parseQueries(urlString)._t, '111')
 })

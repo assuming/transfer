@@ -94,7 +94,7 @@ class Transfer extends Events {
    */
 
   async listCerts() {
-    // TODO: list cert natively
+    return await this.certs.listSignedCerts()
   }
 
   /**
