@@ -37,7 +37,8 @@ const options = {
   mapRules: {},
   blacklist: [],
   certsPath: '/path/to/a/folder',
-  opensslPath: '/path/to/openssl/executable'
+  opensslPath: '/path/to/openssl/executable',
+  caCertName: 'common name for CA cert'
 }
 
 const transfer = new Transfer(options)
@@ -74,6 +75,7 @@ where `options` are:
 ```
 - **certsPath** is a path to a directory that used to store the certificates, default `~/.transfer_certs`
 - **opensslPath** is the path for openssl executable. **Transfer uses openssl to generate certificates**. If not provided, uses the systems's default openssl command.
+- **caCertName** is the `common name` for CA certificates, default is `Transfer Proxy CA`
 
 ### Listen for requests and responses
 

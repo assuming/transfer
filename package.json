@@ -11,7 +11,7 @@
   "author": "ohmyxm",
   "license": "ISC",
   "dependencies": {
-    "cert-base": "^0.1.2",
+    "cert-base": "^1.0.0",
     "chalk": "^1.1.3",
     "convert-hrtime": "^2.0.0",
     "cookie": "^0.3.1",

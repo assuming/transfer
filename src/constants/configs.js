@@ -18,7 +18,8 @@ exports.DEFAULT_INIT_OPTIONS = {
   httpsWhitelist: [],
   mapRules: {},
   blacklist: [],
-  certsPath: path.join(getHomePath(), '.transfer_certs')
+  certsPath: path.join(getHomePath(), '.transfer_certs'),
+  caCertName: 'Transfer Proxy CA'
 }
 
 /**
@@ -34,7 +35,6 @@ exports.TRANSFER_SUBJECT = {
   organization: 'Transfer',
   organizationUnit: 'Transfer Certification Center'
 }
-exports.CA_CERT_COMMONNAME = 'Transfer Proxy CA'
 exports.HTTPS_SERVER_COMMONNAME = 'Transfer HTTPS proxy'
 
 /**

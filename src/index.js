@@ -12,13 +12,13 @@ const { stopServer } = require('./utils/utils')
 // constants
 const {
   TRANSFER_SUBJECT,
-  CA_CERT_COMMONNAME,
   HTTPS_SERVER_COMMONNAME,
   DEFAULT_INIT_OPTIONS
 } = require('./constants/configs')
 
 
 // middlewares
+const createCaChecker = require('./middlewares/ca')
 const createUrlResolver = require('./middlewares/resolver')
 const createInterceptor = require('./middlewares/interceptor')
 const createBlocker = require('./middlewares/blocker')
@@ -90,11 +90,11 @@ class Transfer extends Events {
   }
 
   /**
-   * List the current certs
+   * List the current signed certs
    */
 
   async listCerts() {
-    return await this.certs.listCerts()
+    // TODO: list cert natively
   }
 
   /**
@@ -118,6 +118,7 @@ class Transfer extends Events {
 
   _install() {
     this.app
+      .use(createCaChecker(this.options.certsPath))
       .use(createUrlResolver())
       .use(createInterceptor(this))
       .use(createBlocker(this.options.blacklist))
@@ -136,7 +137,7 @@ class Transfer extends Events {
 
   async _mount() {
     const reqHandler = this.app.callback()
-    const { port, httpsWhitelist } = this.options
+    const { port, httpsWhitelist, caCertName } = this.options
 
     // start http server here for port assign for https server
     this.httpProxy = http.createServer()
@@ -147,7 +148,7 @@ class Transfer extends Events {
 
     // ensure that CA exist
     if (!this.certs.isCAExist()) {
-      await this.certs.createCACert(CA_CERT_COMMONNAME)
+      await this.certs.createCACert(caCertName)
     }
     
     // create a cert pair for https server instance
