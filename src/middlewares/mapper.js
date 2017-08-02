@@ -10,8 +10,9 @@ const { getMapped, checkTarget } = require('../utils/utils')
  * Map local/remote middleware creator
  */
 
-function createMapper(rules) {
+function createMapper(hotOptions) {
   return async (ctx, next) => {
+    const rules = hotOptions.mapRules
     const reqUrl = ctx.url
 
     for (let rule of Object.keys(rules)) {

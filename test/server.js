@@ -42,3 +42,8 @@ transfer
   .then(data => {
     console.log(`Transfer start running at ${data.http.port} & ${data.https.port}`)
   })
+
+setTimeout(function() {
+  console.log('changing whitelist')
+  transfer.updateHttpsWhitelist([])
+}, 5000)

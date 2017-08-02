@@ -8,6 +8,7 @@ const CertBase = require('cert-base')
 const portfinder = require('portfinder')
 const createConnectHandler = require('./handlers/connect-handler')
 const { stopServer } = require('./utils/utils')
+const makeReactive = require('./utils/reactive')
 
 // constants
 const {
@@ -39,6 +40,11 @@ class Transfer extends Events {
       ...DEFAULT_INIT_OPTIONS,
       ...options
     }
+    this.hotOptions = makeReactive({
+      httpsWhitelist: this.options.httpsWhitelist,
+      blacklist: this.options.blacklist,
+      mapRules: this.options.mapRules
+    })
     this.app = new Koa()
     this.certs = new CertBase({
       path: this.options.certsPath,
@@ -74,6 +80,20 @@ class Transfer extends Events {
         stopServer(this.httpsProxy)
       ])
     }
+  }
+
+  /**
+   * Update methods for hot options
+   */
+
+  updateHttpsWhitelist(newVal) {
+    this.hotOptions.httpsWhitelist = newVal
+  }
+  updateBlacklist(newVal) {
+    this.hotOptions.blacklist = newVal
+  }
+  updateMapRules(newVal) {
+    this.hotOptions.mapRules = newVal
   }
 
   /**
@@ -121,8 +141,8 @@ class Transfer extends Events {
       .use(createCaChecker(this.options.certsPath))
       .use(createUrlResolver())
       .use(createInterceptor(this))
-      .use(createBlocker(this.options.blacklist))
-      .use(createMapper(this.options.mapRules))
+      .use(createBlocker(this.hotOptions))
+      .use(createMapper(this.hotOptions))
       .use(createSender(this))
 
     this.app.on('error', (err, ctx) => {
@@ -137,14 +157,14 @@ class Transfer extends Events {
 
   async _mount() {
     const reqHandler = this.app.callback()
-    const { port, httpsWhitelist, caCertName } = this.options
+    const { port, caCertName } = this.options
 
     // start http server here for port assign for https server
     this.httpProxy = http.createServer()
       .on('request', reqHandler)
       .listen(port)
     const httpsPort = await portfinder.getPortPromise()
-    this.httpProxy.on('connect', createConnectHandler(httpsPort, httpsWhitelist, this))
+    this.httpProxy.on('connect', createConnectHandler(httpsPort, this.hotOptions, this))
 
     // ensure that CA exist
     if (!this.certs.isCAExist()) {

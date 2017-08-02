@@ -44,3 +44,6 @@ build/
 
 # test certs
 certs/
+
+# test exp file
+test/exp.js

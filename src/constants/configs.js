@@ -4,8 +4,8 @@ const { getHomePath } = require('../utils/utils.js')
 /**
  * Default options for transfer init
  *
- * - port       : port for server
- * - httpsWhitelist : list for https domains that need to be intercepted
+ * - port           : port for server
+ * - httpsWhitelist : list for https domains that need to be decrypted
  *                    []  -> no HTTPS traffic will be decryted
  *                    '*' -> all HTTPS traffic will be decrypted
  * - mapRules       : object of map pattern
