@@ -35,7 +35,7 @@ transfer
     // console.log('\n')
   })
   .on('error', err => {
-    console.log(chalk.red('\n--------- ERROR ---------'))
+    console.log(chalk.red('\n--------- MY CUSTOM SERVER ERROR ---------'))
     throw err
   })
   .start()
@@ -44,6 +44,8 @@ transfer
   })
 
 setTimeout(function() {
-  console.log('changing whitelist')
-  transfer.updateHttpsWhitelist([])
+  // console.log('changing whitelist')
+  // transfer.updateHttpsWhitelist([])
+
+  transfer.stop()
 }, 5000)

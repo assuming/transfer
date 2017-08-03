@@ -12,18 +12,22 @@ function closable(server) {
   // replace the native close method with our custom one
   server.close = forceClose
 
-  server.on('connection', socket => {
+  // listen for connection for both HTTP & HTTPS
+  server.on('connection', onConnection)
+  server.on('secureConnection', onConnection)
+
+  function onConnection(socket) {
     // record the socket
     sockets.set(socket, socket)
     // delete it when it closes
     socket.on('close', () => sockets.delete(socket))
-  })
+  }
 
   function forceClose(cb) {
+    // call the native close method upon server
+    nativeClose.call(server, cb)
     // destroy every socket including idle & active
     sockets.forEach(socket => socket.destroy())
-    // call the native close method of server
-    server.close(cb)
   }
 
   return server

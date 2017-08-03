@@ -1,5 +1,6 @@
 const util = require('util')
 const zlib = require('zlib')
+const url = require('url')
 const deepcopy = require('deepcopy')
 const { 
   randomId, 
@@ -97,7 +98,7 @@ function getRawRequest(ctx) {
   const headerContent = Object.keys(ctx.headers).map(h => {
     return `${capitalKebab(h)}: ${ctx.headers[h]}`
   }).join('\n') + '\n\n'
-  const startLine = `${ctx.method} ${ctx.path} HTTP/${ctx.req.httpVersion}\n`
+  const startLine = `${ctx.method} ${url.parse(ctx.url).path} HTTP/${ctx.req.httpVersion}\n`
   const rawBody = ctx.request.body.toString()
 
   return startLine + headerContent + rawBody
