@@ -7,8 +7,9 @@ const util = require('util')
 const CertBase = require('cert-base')
 const portfinder = require('portfinder')
 const createConnectHandler = require('./handlers/connect-handler')
-const { stopServer } = require('./utils/utils')
 const makeReactive = require('./utils/reactive')
+const closable = require('./utils/closable')
+const { stopServer } = require('./utils/utils')
 
 // constants
 const {
@@ -160,9 +161,7 @@ class Transfer extends Events {
     const { port, caCertName } = this.options
 
     // start http server here for port assign for https server
-    this.httpProxy = http.createServer()
-      .on('request', reqHandler)
-      .listen(port)
+    this.httpProxy = closable(http.createServer(reqHandler)).listen(port)
     const httpsPort = await portfinder.getPortPromise()
     this.httpProxy.on('connect', createConnectHandler(httpsPort, this.hotOptions, this))
 
@@ -174,14 +173,14 @@ class Transfer extends Events {
     // create a cert pair for https server instance
     const httpsPair = await this.certs.getCertByHost(HTTPS_SERVER_COMMONNAME)
 
-    this.httpsProxy = https.createServer({
+    this.httpsProxy = closable(https.createServer({
       key: httpsPair.key,
       cert: httpsPair.cert,
       SNICallback: async (servername, cb) => {
         const pair = await this.certs.getCertByHost(servername)
         cb(null, tls.createSecureContext(pair))
       }
-    }, reqHandler).listen(httpsPort)
+    }, reqHandler)).listen(httpsPort)
   }
 }
 
