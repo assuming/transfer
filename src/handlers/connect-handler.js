@@ -1,14 +1,14 @@
-const http = require('http')
-const url = require('url')
-const net = require('net')
-const now = require("performance-now")
-const { isInList, randomId } = require('../utils/utils.js')
-const { 
+import http from 'http'
+import url from 'url'
+import net from 'net'
+import now from "performance-now"
+import { isInList, randomId } from '../utils/utils.js'
+import { 
   STATUS_FETCHING,
   STATUS_ERROR,
   STATUS_FINISHED,
   DEFAULT_CONNECT_DATA 
-} = require('../constants/configs')
+} from '../constants/configs'
 
 /**
  * Constants
@@ -26,7 +26,7 @@ const localhost = '127.0.0.1'
  * @return {Function} connect handler function
  */
 
-function createConnectHandler(port, hotOptions, transfer) {
+export default function createConnectHandler(port, hotOptions, transfer) {
   return (req, socket, head) => {
     const reqData = url.parse(`https://${req.url}`)
     const httpsWhitelist = hotOptions.httpsWhitelist
@@ -75,8 +75,6 @@ function createConnectHandler(port, hotOptions, transfer) {
     }
   }
 }
-
-module.exports = createConnectHandler
 
 /**
  * Make tcp connection

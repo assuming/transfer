@@ -6,7 +6,7 @@
  * or keep alive connections
  */
 
-function closable(server) {
+export default function closable(server) {
   const sockets = new Map()
   const nativeClose = server.close
   // replace the native close method with our custom one
@@ -32,5 +32,3 @@ function closable(server) {
 
   return server
 }
-
-module.exports = closable

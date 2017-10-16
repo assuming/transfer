@@ -20,7 +20,7 @@
  * performance difference)
  **/
 
-function checkIsHttpToken(val) {
+function validHeaderName(val) {
   if (typeof val !== 'string' || val.length === 0)
     return false;
 
@@ -153,8 +153,9 @@ function cleanHeaderValue(val) {
   return cleanVal;
 }
 
-exports.validHeaderName = checkIsHttpToken
-exports.cleanHeaderName = cleanHeaderName
-
-exports.validHeaderValue = validHeaderValue
-exports.cleanHeaderValue = cleanHeaderValue
+export {
+  validHeaderName,
+  cleanHeaderName,
+  validHeaderValue,
+  cleanHeaderValue
+}

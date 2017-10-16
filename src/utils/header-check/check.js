@@ -5,7 +5,7 @@
  * Which solve header invalid problem in node
  */
 
-const rules = require('./rules')
+import rules from './rules'
 
 function cleanName(name) {
   if (rules.validHeaderName(name)) {
@@ -23,7 +23,7 @@ function cleanValue(value) {
   }
 }
 
-function cleanHeaders(headers) {
+export default function cleanHeaders(headers) {
   var cleanHeaders = {}
   if (!headers) {
     return cleanHeaders
@@ -36,5 +36,3 @@ function cleanHeaders(headers) {
   })
   return cleanHeaders
 }
-
-module.exports = cleanHeaders

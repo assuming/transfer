@@ -2,7 +2,7 @@
  * Make property inside an Object reactive
  */
 
-function makeReactive(obj) {
+export default function makeReactive(obj) {
   const reactiveObj = {}
 
   Object.keys(obj).forEach(key => {
@@ -23,5 +23,3 @@ function makeReactive(obj) {
 
   return reactiveObj
 }
-
-module.exports = makeReactive

@@ -1,16 +1,15 @@
-const url = require('url')
-const util = require('util')
-const fs = require('fs')
-const mime = require('mime')
-const matcher = require('matcher')
-const urljoin = require('url-join')
-const { getMapped, checkTarget } = require('../utils/utils')
+import url from 'url'
+import util from 'util'
+import fs from 'fs'
+import mime from 'mime'
+import matcher from 'matcher'
+import { getMapped, checkTarget } from '../utils/utils'
 
 /**
  * Map local/remote middleware creator
  */
 
-function createMapper(hotOptions) {
+export default function createMapper(hotOptions) {
   return async (ctx, next) => {
     const rules = hotOptions.mapRules
     const reqUrl = ctx.url
@@ -50,8 +49,6 @@ function createMapper(hotOptions) {
     await next()
   }
 }
-
-module.exports = createMapper
 
 /**
  * Respond with local files

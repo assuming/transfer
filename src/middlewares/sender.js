@@ -1,22 +1,22 @@
-const http = require('http')
-const https = require('https')
-const url = require('url')
-const util = require('util')
-const now = require("performance-now")
-const cleanHeaders = require('../utils/header-check/check')
-const { 
+import http from 'http'
+import https from 'https'
+import url from 'url'
+import util from 'util'
+import now from "performance-now"
+import cleanHeaders from '../utils/header-check/check'
+import { 
   httpsCheck, 
   assembleURL, 
   rq,
   getStreamData
-} = require('../utils/utils')
-const { STATUS_ERROR } = require('../constants/configs')
+} from '../utils/utils'
+import { STATUS_ERROR } from '../constants/configs'
 
 /**
  * Request sending middleware creator
  */
 
-function createSender(transfer) {
+export default function createSender(transfer) {
   return async (ctx, next) => {
     const collector = ctx.state.collector
     const timings = ctx.state.timings
@@ -90,8 +90,6 @@ function createSender(transfer) {
     ctx.body = bodyBuffer
   }
 }
-
-module.exports = createSender
 
 /**
  * Make options from in-coming request

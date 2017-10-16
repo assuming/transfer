@@ -1,31 +1,31 @@
-const Koa = require('koa')
-const http = require('http')
-const https = require('https')
-const tls = require('tls')
-const Events = require('events')
-const util = require('util')
-const CertBase = require('cert-base')
-const portfinder = require('portfinder')
-const createConnectHandler = require('./handlers/connect-handler')
-const makeReactive = require('./utils/reactive')
-const closable = require('./utils/closable')
-const { stopServer } = require('./utils/utils')
+import Koa from 'koa'
+import http from 'http'
+import https from 'https'
+import tls from 'tls'
+import Events from 'events'
+import util from 'util'
+import CertBase from 'cert-base'
+import portfinder from 'portfinder'
+import createConnectHandler from './handlers/connect-handler'
+import makeReactive from './utils/reactive'
+import closable from './utils/closable'
+import { stopServer } from './utils/utils'
 
 // constants
-const {
+import {
   TRANSFER_SUBJECT,
   HTTPS_SERVER_COMMONNAME,
   DEFAULT_INIT_OPTIONS
-} = require('./constants/configs')
+} from './constants/configs'
 
 
 // middlewares
-const createCaChecker = require('./middlewares/ca')
-const createUrlResolver = require('./middlewares/resolver')
-const createInterceptor = require('./middlewares/interceptor')
-const createBlocker = require('./middlewares/blocker')
-const createMapper = require('./middlewares/mapper')
-const createSender = require('./middlewares/sender')
+import createCaChecker from './middlewares/ca'
+import createUrlResolver from './middlewares/resolver'
+import createInterceptor from './middlewares/interceptor'
+import createBlocker from './middlewares/blocker'
+import createMapper from './middlewares/mapper'
+import createSender from './middlewares/sender'
 
 /**
  * Transfer itself is an event emitter

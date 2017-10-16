@@ -10,6 +10,9 @@
     "start-server": "node test/server.js"
   },
   "author": "ohmyxm",
+  "engine": {
+    "node": ">=7.0.0"
+  },
   "license": "ISC",
   "dependencies": {
     "cert-base": "^1.1.0",
@@ -27,6 +30,7 @@
   "devDependencies": {
     "babel-cli": "^6.22.2",
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "babel-preset-env": "^1.6.0",
     "blue-tape": "^1.0.0",
     "tape": "^4.6.3"
   },

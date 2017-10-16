@@ -1,27 +1,27 @@
-const util = require('util')
-const zlib = require('zlib')
-const url = require('url')
-const deepcopy = require('deepcopy')
-const { 
+import util from 'util'
+import zlib from 'zlib'
+import url from 'url'
+import deepcopy from 'deepcopy'
+import { 
   randomId, 
   getStreamData, 
   parseCookies,
   capitalKebab,
   parseQueries,
-} = require('../utils/utils')
-const {
+} from '../utils/utils'
+import {
   STATUS_ERROR,
   STATUS_FETCHING,
   STATUS_FINISHED,
   DEFAULT_COLLECTOR_DATA,
   DEFAULT_TIMINGS
-} = require('../constants/configs')
+} from '../constants/configs'
 
 /**
  * Intercept req and res to get information
  */
 
-function createInterceptor(transfer) {
+export default function createInterceptor(transfer) {
   return async (ctx, next) => {
     // init collector data and assign an id
     ctx.state.collector = deepcopy(DEFAULT_COLLECTOR_DATA)
@@ -56,8 +56,6 @@ function createInterceptor(transfer) {
     transfer.emit('response', ctx.state.collector)
   }
 }
-
-module.exports = createInterceptor
 
 /**
  * Markers for request data

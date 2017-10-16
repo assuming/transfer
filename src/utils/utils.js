@@ -1,20 +1,20 @@
-const url = require('url')
-const http = require('http')
-const https = require('https')
-const querystring = require('querystring')
-const tls = require('tls')
-const path = require('path')
-const crypto = require('crypto')
-const matcher = require('matcher')
-const urljoin = require('url-join')
-const cookie = require('cookie')
+import url from 'url'
+import http from 'http'
+import https from 'https'
+import querystring from 'querystring'
+import tls from 'tls'
+import path from 'path'
+import crypto from 'crypto'
+import matcher from 'matcher'
+import urljoin from 'url-join'
+import cookie from 'cookie'
 
 
 /**
  * Promisified server close function
  */
 
-exports.stopServer = function(server) {
+export function stopServer(server) {
   return new Promise((resolve, reject) => {
     server.close(e => {
       if (e) {
@@ -30,7 +30,7 @@ exports.stopServer = function(server) {
  * Check req type, return true if https
  */
 
-exports.httpsCheck = function(urlString) {
+export function httpsCheck(urlString) {
   const result = urlString.indexOf('http://') < 0 ? true : false
   return result
 }
@@ -39,7 +39,7 @@ exports.httpsCheck = function(urlString) {
  * Assemble URL using given host header and path (https server)
  */
 
-exports.assembleURL = function(host, _path) {
+export function assembleURL(host, _path) {
   const _url = `https://${path.join(host, _path)}`
   return _url
 }
@@ -48,7 +48,7 @@ exports.assembleURL = function(host, _path) {
  * Create random id for each session
  */
 
-exports.randomId = function() {
+export function randomId() {
   return crypto.randomBytes(16).toString('hex')
 }
 
@@ -56,7 +56,7 @@ exports.randomId = function() {
  * Make path for '~/'
  */
 
-exports.getHomePath = function() {
+export function getHomePath() {
   // only works on *nix
   return process.env.HOME
 }
@@ -65,7 +65,7 @@ exports.getHomePath = function() {
  * Check if a given host matches any domain in the whitelist
  */
 
-exports.isInList = function(hostname, list) {
+export function isInList(hostname, list) {
   for (let domain of list) {
     const regString = domain.split('.').join('\\.')
     // e.g. /\.github\.com$/gi
@@ -98,7 +98,7 @@ const UNKNOWN_RULE = 'UNKNOWN_RULE'
  * @returns {String} or false
  */
 
-exports.getMapped = function(urlString, ruleObj) {
+export function getMapped(urlString, ruleObj) {
   const rule = ruleObj.rule
   const target = ruleObj.target
   let result = false
@@ -169,7 +169,7 @@ function getRuleType(ruleObj) {
  * Check if a target is a remote rule
  */
 
-exports.checkTarget = function(target) {
+export function checkTarget(target) {
   const re = /^http/g
   return re.test(target)
 }
@@ -182,7 +182,7 @@ exports.checkTarget = function(target) {
  * @returns {Boolean}
  */
 
-exports.isBlack = function(urlString, rule) {
+export function isBlack(urlString, rule) {
   let result = false
   const blackType = getBlackRuleType(rule)
 
@@ -219,7 +219,7 @@ function getBlackRuleType(rule) {
  * Take url method headers to send request
  */
 
-exports.rq = function(options, cb) {
+export function rq(options, cb) {
   const urlData = url.parse(options.url)
   const defaultPort = urlData.protocol === 'https:' ? 443 : 80
   const protocol = urlData.protocol === 'https:' ? https : http
@@ -239,7 +239,7 @@ exports.rq = function(options, cb) {
  * Consume a req or res stream and put the data in Buffer
  */
 
-exports.getStreamData = async function(stream) {
+export async function getStreamData(stream) {
   return new Promise((resolve, reject) => {
     let bufferArray = []
     stream
@@ -256,7 +256,7 @@ exports.getStreamData = async function(stream) {
  * In 'response' object, 'set-cookie' header is an Array
  */
 
-exports.parseCookies = function(ck) {
+export function parseCookies(ck) {
   let cookies = {}
   if (ck) {
     if (typeof ck === 'string') {
@@ -275,7 +275,7 @@ exports.parseCookies = function(ck) {
  * kebab-case to Kebab-Case
  */
 
-exports.capitalKebab = function(str) {
+export function capitalKebab(str) {
   const particals = str.split('-')
 
   return particals.map(item => {
@@ -287,7 +287,7 @@ exports.capitalKebab = function(str) {
  * Parser for query string
  */
 
-exports.parseQueries = function(str) {
+export function parseQueries(str) {
   const rawQueries = str.split('?')[1]
   return querystring.parse(rawQueries)
 }

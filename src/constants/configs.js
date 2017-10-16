@@ -1,5 +1,5 @@
-const path = require('path')
-const { getHomePath } = require('../utils/utils.js')
+import path from 'path'
+import { getHomePath } from '../utils/utils.js'
 
 /**
  * Default options for transfer init
@@ -13,7 +13,7 @@ const { getHomePath } = require('../utils/utils.js')
  * - certsPath      : where to store certs
  */
 
-exports.DEFAULT_INIT_OPTIONS = {
+export const DEFAULT_INIT_OPTIONS = {
   port: 7777,
   httpsWhitelist: [],
   mapRules: {},
@@ -27,26 +27,26 @@ exports.DEFAULT_INIT_OPTIONS = {
  */
 
 // where to store certs
-exports.CERTBASE_PATH = path.join(getHomePath(), '.transfer_certs')
+export const CERTBASE_PATH = path.join(getHomePath(), '.transfer_certs')
 
 // default subject of transfer
-exports.TRANSFER_SUBJECT = {
+export const TRANSFER_SUBJECT = {
   country: 'CN',
   organization: 'Transfer',
   organizationUnit: 'Transfer Certification Center'
 }
-exports.HTTPS_SERVER_COMMONNAME = 'Transfer HTTPS proxy'
+export const HTTPS_SERVER_COMMONNAME = 'Transfer HTTPS proxy'
 
 /**
  * Default intercept collector object
  */
 
 // request status types
-exports.STATUS_FETCHING = 'Fetching'
-exports.STATUS_ERROR = 'Error'
-exports.STATUS_FINISHED = 'Finished'
+export const STATUS_FETCHING = 'Fetching'
+export const STATUS_ERROR = 'Error'
+export const STATUS_FINISHED = 'Finished'
 
-exports.DEFAULT_COLLECTOR_DATA = {
+export const DEFAULT_COLLECTOR_DATA = {
   crypted: false,
   id: '',
   status: 'Fetching',
@@ -89,7 +89,7 @@ exports.DEFAULT_COLLECTOR_DATA = {
   }
 }
 
-exports.DEFAULT_CONNECT_DATA = {
+export const DEFAULT_CONNECT_DATA = {
   crypted: true,
   id: '',
   status: 'Fetching',
@@ -106,7 +106,7 @@ exports.DEFAULT_CONNECT_DATA = {
   }
 }
 
-exports.DEFAULT_TIMINGS = {
+export const DEFAULT_TIMINGS = {
   startTime: 0,
   start: 0,
   socket: 0,

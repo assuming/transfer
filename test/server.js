@@ -18,7 +18,7 @@ const transfer = new Transfer({
   },
   certsPath: path.join(__dirname, '../certs'),
   blacklist: [],
-  opensslPath: '/usr/local/Cellar/openssl/1.0.2k/bin/openssl',
+  // opensslPath: '/usr/local/Cellar/openssl/1.0.2k/bin/openssl',
   caCertName: 'Transfer Proxy Test CA'
 })
 transfer

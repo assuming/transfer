@@ -1,11 +1,11 @@
-const path = require('path')
-const fs = require('fs')
+import path from 'path'
+import fs from 'fs'
 
 /**
  * Intercept CA certificate request and send the cert back
  */
 
-function createCaChecker(certsPath) {
+export default function createCaChecker(certsPath) {
   const caPath = path.join(certsPath, 'ca', 'ca.crt')
   
   return async (ctx, next) => {
@@ -25,8 +25,6 @@ function createCaChecker(certsPath) {
     await next()
   }
 }
-
-module.exports = createCaChecker
 
 function isCaRequest(urlString) {
   if (urlString.indexOf('http://get.ca/') !== -1) {

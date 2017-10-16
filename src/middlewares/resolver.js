@@ -1,13 +1,13 @@
-const { 
+import { 
   httpsCheck,
   assembleURL
-} = require('../utils/utils')
+} from '../utils/utils'
 
 /**
  * Resolve https URL to complete URL
  */
 
-function createUrlResolver() {
+export default function createUrlResolver() {
   return async (ctx, next) => {
     const isHttps = httpsCheck(ctx.url)
 
@@ -19,5 +19,3 @@ function createUrlResolver() {
     await next()
   }
 }
-
-module.exports = createUrlResolver

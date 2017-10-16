@@ -1,10 +1,10 @@
-const { isBlack } = require('../utils/utils')
+import { isBlack } from '../utils/utils'
 
 /**
  * Black list blocker creator
  */
 
-function createBlocker(hotOptions) {
+export default function createBlocker(hotOptions) {
   return async (ctx, next) => {
     const blacklist = hotOptions.blacklist
     const reqUrl = ctx.url
@@ -21,8 +21,6 @@ function createBlocker(hotOptions) {
     await next()
   }
 }
-
-module.exports = createBlocker
 
 /**
  * Block the response by 404
