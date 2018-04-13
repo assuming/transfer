@@ -1,7 +1,4 @@
-import { 
-  httpsCheck,
-  assembleURL
-} from '../utils/utils'
+import { httpsCheck, assembleURL } from '../utils/utils'
 
 /**
  * Resolve https URL to complete URL

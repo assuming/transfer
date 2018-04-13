@@ -40,8 +40,7 @@ export function httpsCheck(urlString) {
  */
 
 export function assembleURL(host, _path) {
-  const _url = `https://${path.join(host, _path)}`
-  return _url
+  return `https://${path.join(host, _path)}`
 }
 
 /**
@@ -50,15 +49,6 @@ export function assembleURL(host, _path) {
 
 export function randomId() {
   return crypto.randomBytes(16).toString('hex')
-}
-
-/**
- * Make path for '~/'
- */
-
-export function getHomePath() {
-  // only works on *nix
-  return process.env.HOME
 }
 
 /**

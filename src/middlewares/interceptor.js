@@ -10,11 +10,9 @@ import {
   parseQueries,
 } from '../utils/utils'
 import {
-  STATUS_ERROR,
-  STATUS_FETCHING,
   STATUS_FINISHED,
   DEFAULT_COLLECTOR_DATA,
-  DEFAULT_TIMINGS
+  DEFAULT_TIMINGS,
 } from '../constants/configs'
 
 /**
@@ -68,7 +66,7 @@ export default function createInterceptor(transfer) {
  */
 
 async function markRequest(ctx) {
-  // mount bodyBuffer to ctx for request sending
+  // mount request body data for sending request correctly
   const bodyBuffer = await getStreamData(ctx.req)
   ctx.request.body = bodyBuffer
 
@@ -86,10 +84,7 @@ async function markRequest(ctx) {
     }
   }
 
-  ctx.state.collector = { 
-    ...ctx.state.collector, 
-    ...data 
-  }
+  ctx.state.collector = { ...ctx.state.collector, ...data }
 }
 
 function getRawRequest(ctx) {

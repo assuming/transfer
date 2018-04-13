@@ -1,9 +1,9 @@
-import Koa from 'koa'
+import tls from 'tls'
+import util from 'util'
 import http from 'http'
 import https from 'https'
-import tls from 'tls'
 import Events from 'events'
-import util from 'util'
+import Koa from 'koa'
 import CertBase from 'cert-base'
 import portfinder from 'portfinder'
 import createConnectHandler from './handlers/connect-handler'
@@ -17,7 +17,6 @@ import {
   HTTPS_SERVER_COMMONNAME,
   DEFAULT_INIT_OPTIONS
 } from './constants/configs'
-
 
 // middlewares
 import createCaChecker from './middlewares/ca'
@@ -63,7 +62,7 @@ class Transfer extends Events {
 
   async start() {
     await this._mount()
-    return this.getStatus()
+    return this.getAddress()
   }
 
   /**
@@ -84,6 +83,19 @@ class Transfer extends Events {
   }
 
   /**
+   * Get the 2 proxy address info
+   *
+   * @returns Object with server address
+   */
+
+  getAddress() {
+    return {
+      http: this.httpProxy.address(),
+      https: this.httpsProxy.address()
+    }
+  }
+
+  /**
    * Update methods for hot options
    */
 
@@ -96,42 +108,6 @@ class Transfer extends Events {
   updateMapRules(newVal) {
     this.hotOptions.mapRules = newVal
   }
-
-  /**
-   * Get the 2 proxy address info
-   *
-   * @returns Object with server address
-   */
-
-  getStatus() {
-    return {
-      http: this.httpProxy.address(),
-      https: this.httpsProxy.address()
-    }
-  }
-
-  /**
-   * List the current signed certs
-   */
-
-  async listCerts() {
-    return await this.certs.listSignedCerts()
-  }
-
-  /**
-   * Remove cert from the cert base
-   * 
-   * @param {String} domain name of the cert you want to remove
-   *                        * means you want to remove all of them 
-   */
-
-  async removeCert(domain) {
-    if (domain === '*') {
-      return await this.certs.removeAllCerts()
-    }
-
-    return await this.certs.removeCert(domain)
-  }
   
   /**
    * Install middlewares into app and listen for errors
@@ -142,8 +118,8 @@ class Transfer extends Events {
       .use(createCaChecker(this.options.certsPath))
       .use(createUrlResolver())
       .use(createInterceptor(this))
-      .use(createBlocker(this.hotOptions))
-      .use(createMapper(this.hotOptions))
+      // .use(createBlocker(this.hotOptions))
+      // .use(createMapper(this.hotOptions))
       .use(createSender(this))
 
     this.app.on('error', (err, ctx) => {

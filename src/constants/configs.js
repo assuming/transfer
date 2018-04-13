@@ -1,33 +1,9 @@
+import os from 'os'
 import path from 'path'
-import { getHomePath } from '../utils/utils.js'
-
-/**
- * Default options for transfer init
- *
- * - port           : port for server
- * - httpsWhitelist : list for https domains that need to be decrypted
- *                    []  -> no HTTPS traffic will be decryted
- *                    '*' -> all HTTPS traffic will be decrypted
- * - mapRules       : object of map pattern
- * - blacklist      : list of url rules
- * - certsPath      : where to store certs
- */
-
-export const DEFAULT_INIT_OPTIONS = {
-  port: 7777,
-  httpsWhitelist: [],
-  mapRules: {},
-  blacklist: [],
-  certsPath: path.join(getHomePath(), '.transfer_certs'),
-  caCertName: 'Transfer Proxy CA'
-}
 
 /**
  * Certification constants
  */
-
-// where to store certs
-export const CERTBASE_PATH = path.join(getHomePath(), '.transfer_certs')
 
 // default subject of transfer
 export const TRANSFER_SUBJECT = {
@@ -36,6 +12,21 @@ export const TRANSFER_SUBJECT = {
   organizationUnit: 'Transfer Certification Center'
 }
 export const HTTPS_SERVER_COMMONNAME = 'Transfer HTTPS proxy'
+
+/** 
+ * Default options for transfer init
+ */
+
+export const DEFAULT_INIT_OPTIONS = {
+  port: 7777,
+  certsPath: path.join(os.homedir(), '.transfer_certs'),
+  caCertName: 'Transfer Proxy CA',
+  opensslPath: null,
+  // hot options
+  httpsWhitelist: [],
+  mapRules: [],
+  blacklist: [],
+}
 
 /**
  * Default intercept collector object
@@ -47,12 +38,12 @@ export const STATUS_ERROR = 'Error'
 export const STATUS_FINISHED = 'Finished'
 
 export const DEFAULT_COLLECTOR_DATA = {
-  crypted: false,
   id: '',
-  status: 'Fetching',
+  status: STATUS_FETCHING,
   url: '',
   method: '',
   protocol: '',
+  protocolVersion: '',
   request: {
     raw: '',
     headers: {},
@@ -90,9 +81,8 @@ export const DEFAULT_COLLECTOR_DATA = {
 }
 
 export const DEFAULT_CONNECT_DATA = {
-  crypted: true,
   id: '',
-  status: 'Fetching',
+  status: STATUS_FETCHING,
   method: 'CONNECT',
   url: '',
   protocol: 'https',
