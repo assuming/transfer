@@ -74,6 +74,7 @@ export function isInList(hostname, list) {
  * Rule match types
  */
 
+// TODO: remove all this
 const FULL_MATCH = 'FULL_MATCH'
 const DIR_MATCH = 'DIR_MATCH'
 const UNKNOWN_RULE = 'UNKNOWN_RULE'
@@ -280,4 +281,65 @@ export function capitalKebab(str) {
 export function parseQueries(str) {
   const rawQueries = str.split('?')[1]
   return querystring.parse(rawQueries)
+}
+
+/**
+ * Make property inside an Object reactive
+ */
+
+export function makeReactive(obj) {
+  const reactiveObj = {}
+
+  Object.keys(obj).forEach(key => {
+    let val = obj[key]
+
+    Object.defineProperty(reactiveObj, key, {
+      enumerable: true,
+      configurable: true,
+
+      get() {
+        return val
+      },
+      set(newVal) {
+        val = newVal
+      }
+    })
+  })
+
+  return reactiveObj
+}
+
+/**
+ * Decorator for node's server. Enhance the close method
+ * 
+ * Make the close method shutdown the server immediately 
+ * regardless of the existence of active socket connections 
+ * or keep alive connections
+ */
+
+export function closable(server) {
+  const sockets = new Map()
+  const nativeClose = server.close
+  // replace the native close method with our custom one
+  server.close = forceClose
+
+  // listen for connection for both HTTP & HTTPS
+  server.on('connection', onConnection)
+  server.on('secureConnection', onConnection)
+
+  function onConnection(socket) {
+    // record the socket
+    sockets.set(socket, socket)
+    // delete it when it closes
+    socket.on('close', () => sockets.delete(socket))
+  }
+
+  function forceClose(cb) {
+    // call the native close method upon server
+    nativeClose.call(server, cb)
+    // destroy every socket including idle & active
+    sockets.forEach(socket => socket.destroy())
+  }
+
+  return server
 }

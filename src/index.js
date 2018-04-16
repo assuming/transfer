@@ -7,9 +7,11 @@ import Koa from 'koa'
 import CertBase from 'cert-base'
 import portfinder from 'portfinder'
 import createConnectHandler from './handlers/connect-handler'
-import makeReactive from './utils/reactive'
-import closable from './utils/closable'
-import { stopServer } from './utils/utils'
+import { 
+  stopServer, 
+  makeReactive, 
+  closable 
+} from './utils/utils'
 
 // constants
 import {
